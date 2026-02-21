@@ -52,21 +52,6 @@ export default function RegisterPage() {
       return
     }
 
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          email: email,
-          full_name: fullName,
-          role: role,
-        })
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError)
-      }
-    }
-
     router.push('/dashboard')
     router.refresh()
   }
