@@ -1,62 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Plus, Search, Mail, Phone, MoreVertical } from 'lucide-react'
-
-const mockTeamMembers = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john.smith@construction.com',
-    phone: '+1 (555) 123-4567',
-    role: 'foreman',
-    trade: 'Electrical',
-    projects: ['Downtown Tower', 'Harbor Bridge'],
-    status: 'active',
-  },
-  {
-    id: '2',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@construction.com',
-    phone: '+1 (555) 234-5678',
-    role: 'project_manager',
-    trade: null,
-    projects: ['Downtown Tower', 'Metro Station'],
-    status: 'active',
-  },
-  {
-    id: '3',
-    name: 'Mike Johnson',
-    email: 'mike.johnson@construction.com',
-    phone: '+1 (555) 345-6789',
-    role: 'field_worker',
-    trade: 'Plumbing',
-    projects: ['Harbor Bridge'],
-    status: 'active',
-  },
-  {
-    id: '4',
-    name: 'Emily Davis',
-    email: 'emily.davis@construction.com',
-    phone: '+1 (555) 456-7890',
-    role: 'safety_manager',
-    trade: null,
-    projects: ['Downtown Tower', 'Harbor Bridge', 'Metro Station'],
-    status: 'active',
-  },
-  {
-    id: '5',
-    name: 'David Lee',
-    email: 'david.lee@construction.com',
-    phone: '+1 (555) 567-8901',
-    role: 'field_worker',
-    trade: 'HVAC',
-    projects: ['Metro Station'],
-    status: 'inactive',
-  },
-]
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Mail, Phone, Briefcase } from 'lucide-react'
+import { getOrganizationMembers } from '@/lib/actions/team'
+import { AddMemberDialog } from '@/components/team/add-member-dialog'
+import { redirect } from 'next/navigation'
 
 const roleColors: Record<string, string> = {
   project_manager: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
@@ -66,7 +14,23 @@ const roleColors: Record<string, string> = {
   executive: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300',
 }
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const { data: members, error } = await getOrganizationMembers()
+
+  if (error) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-foreground">Unable to load team</h2>
+          <p className="text-muted-foreground mt-2">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!members) {
+    redirect('/login')
+  }
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -76,89 +40,106 @@ export default function TeamPage() {
             Manage team members and assignments
           </p>
         </div>
-        <Button className="bg-amber-500 hover:bg-amber-600">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Team Member
-        </Button>
+        <AddMemberDialog />
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
-          <Input placeholder="Search team members..." className="pl-9" />
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">All Roles</Button>
-          <Button variant="ghost" size="sm">Active</Button>
-          <Button variant="ghost" size="sm">Inactive</Button>
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">Total Members</p>
+            <p className="text-2xl font-bold text-foreground">{members.length}</p>
+          </div>
+          <Briefcase className="h-8 w-8 text-muted-foreground" />
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {mockTeamMembers.map((member) => {
-          const initials = member.name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-          const roleLabel = member.role
-            .split('_')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ')
+        {members.length === 0 ? (
+          <div className="col-span-full rounded-lg border border-dashed border-border bg-card p-12 text-center">
+            <Briefcase className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No team members yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">Get started by adding your first team member</p>
+            <AddMemberDialog />
+          </div>
+        ) : (
+          members.map((member) => {
+            const displayName = member.name || member.email || 'User'
+            const initials = displayName
+              .split(' ')
+              .map((n) => n[0])
+              .join('')
+              .toUpperCase()
+              .slice(0, 2)
+            const roleLabel = member.role
+              ? member.role
+                  .split('_')
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ')
+              : 'No Role'
 
-          return (
-            <Card key={member.id} className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-2"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center text-center">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={undefined} alt={member.name} />
-                    <AvatarFallback className="bg-amber-100 text-amber-700 text-lg">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h3 className="mt-4 font-semibold text-stone-900 dark:text-white">
-                    {member.name}
-                  </h3>
-                  <div className="mt-1 flex items-center gap-2">
-                    <Badge className={roleColors[member.role]}>{roleLabel}</Badge>
-                    {member.trade && (
-                      <span className="text-sm text-stone-500">{member.trade}</span>
+            return (
+              <Card key={member.user_id}>
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center text-center">
+                    <Avatar className="h-16 w-16">
+                      <AvatarFallback className="bg-amber-100 text-amber-700 text-lg dark:bg-amber-900/30 dark:text-amber-400">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h3 className="mt-4 font-semibold text-foreground">
+                      {member.name || 'Unnamed User'}
+                    </h3>
+                    <div className="mt-1 flex flex-col items-center gap-2">
+                      <Badge className={member.role ? roleColors[member.role] : 'bg-stone-100 text-stone-700'}>
+                        {roleLabel}
+                      </Badge>
+                      {member.trade && (
+                        <span className="text-sm text-muted-foreground">{member.trade}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-2 text-sm">
+                    {member.email && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Mail className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{member.email}</span>
+                      </div>
+                    )}
+                    {member.phone && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4 shrink-0" />
+                        <span>{member.phone}</span>
+                      </div>
                     )}
                   </div>
-                </div>
 
-                <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-stone-600 dark:text-stone-400">
-                    <Mail className="h-4 w-4" />
-                    <span className="truncate">{member.email}</span>
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Assigned Projects ({member.projectCount || 0})
+                    </p>
+                    {member.projects && member.projects.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {member.projects.slice(0, 3).map((project) => (
+                          <Badge key={project.id} variant="outline" className="text-xs">
+                            {project.name}
+                          </Badge>
+                        ))}
+                        {member.projects.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{member.projects.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">No projects assigned</p>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 text-stone-600 dark:text-stone-400">
-                    <Phone className="h-4 w-4" />
-                    <span>{member.phone}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-800">
-                  <p className="text-xs text-stone-500 mb-2">Assigned Projects</p>
-                  <div className="flex flex-wrap gap-1">
-                    {member.projects.map((project) => (
-                      <Badge key={project} variant="outline" className="text-xs">
-                        {project}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+                </CardContent>
+              </Card>
+            )
+          })
+        )}
       </div>
     </div>
   )
