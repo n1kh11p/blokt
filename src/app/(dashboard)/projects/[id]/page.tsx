@@ -15,9 +15,12 @@ import {
   Video
 } from 'lucide-react'
 import { getProject } from '@/lib/actions/projects'
+import { getProjectSafetyAlerts } from '@/lib/actions/safety'
 import { EditProjectDialog } from '@/components/projects/edit-project-dialog'
 import { TaskDialog } from '@/components/projects/task-dialog'
 import { AddMemberDialog, EditMemberDialog } from '@/components/projects/member-dialog'
+import { SafetyAlertCard } from '@/components/safety/alert-card'
+import { CreateSafetyAlertDialog } from '@/components/safety/create-alert-dialog'
 
 const statusColors: Record<string, string> = {
   active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -33,6 +36,7 @@ interface ProjectPageProps {
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { id } = await params
   const { data: project, error } = await getProject(id)
+  const { data: safetyAlerts } = await getProjectSafetyAlerts(id)
 
   if (error || !project) {
     notFound()
@@ -42,7 +46,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const taskCount = project.planned_tasks?.length || 0
   const completedTasks = project.planned_tasks?.filter((t: { status: string }) => t.status === 'completed').length || 0
   const memberCount = project.project_members?.length || 0
-  const alertCount = project.safety_alerts?.length || 0
+  const alertCount = safetyAlerts?.length || 0
   const videoCount = project.video_uploads?.length || 0
 
   return (
@@ -335,9 +339,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <TabsContent value="safety">
           <Card>
-            <CardHeader>
-              <CardTitle>Safety Alerts</CardTitle>
-              <CardDescription>OSHA compliance violations detected</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Safety Alerts</CardTitle>
+                <CardDescription>OSHA compliance violations detected</CardDescription>
+              </div>
+              <CreateSafetyAlertDialog />
             </CardHeader>
             <CardContent>
               {alertCount === 0 ? (
@@ -352,42 +359,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {project.safety_alerts?.map((alert: {
-                    id: string
-                    violation_type: string
-                    severity: string
-                    description: string
-                    timestamp: string
-                  }) => (
-                    <div
-                      key={alert.id}
-                      className="rounded-lg border border-stone-200 p-4 dark:border-stone-800"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-medium text-stone-900 dark:text-white">
-                            {alert.violation_type}
-                          </p>
-                          <p className="text-sm text-stone-500">
-                            {alert.description}
-                          </p>
-                          <p className="mt-1 text-xs text-stone-400">
-                            {new Date(alert.timestamp).toLocaleString()}
-                          </p>
-                        </div>
-                        <Badge
-                          className={
-                            alert.severity === 'critical'
-                              ? 'bg-red-100 text-red-700'
-                              : alert.severity === 'high'
-                              ? 'bg-orange-100 text-orange-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }
-                        >
-                          {alert.severity}
-                        </Badge>
-                      </div>
-                    </div>
+                  {safetyAlerts?.map((alert) => (
+                    <SafetyAlertCard key={alert.id} alert={alert} />
                   ))}
                 </div>
               )}

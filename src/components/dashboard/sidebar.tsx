@@ -55,7 +55,6 @@ const navItems: NavItem[] = [
     title: 'Safety',
     href: '/safety',
     icon: Shield,
-    roles: ['safety_manager', 'project_manager', 'executive'],
   },
   {
     title: 'Team',
