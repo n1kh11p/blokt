@@ -5,24 +5,25 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    // Initialize theme from localStorage or system preference
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      return savedTheme || (prefersDark ? 'dark' : 'light')
-    }
-    return 'light'
-  })
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // Initialize theme from localStorage or system preference
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light')
+    
+    setTheme(initialTheme)
+    setMounted(true)
+    
     // Apply theme to document
-    if (theme === 'dark') {
+    if (initialTheme === 'dark') {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
-  }, [theme])
+  }, [])
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
@@ -34,6 +35,21 @@ export function ThemeToggle() {
     } else {
       document.documentElement.classList.remove('dark')
     }
+  }
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9"
+        aria-label="Toggle theme"
+        disabled
+      >
+        <Sun className="h-4 w-4 opacity-0" />
+      </Button>
+    )
   }
 
   return (
