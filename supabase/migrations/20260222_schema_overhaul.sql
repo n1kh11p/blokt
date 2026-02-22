@@ -196,21 +196,21 @@ CREATE POLICY "Users can delete projects they are assigned to"
   USING (user_ids @> ARRAY[auth.uid()]);
 
 -- RLS Policies for tasks
-CREATE POLICY "Users can view tasks they are assigned to"
+CREATE POLICY "Users can view tasks"
   ON tasks FOR SELECT
-  USING (assignees @> ARRAY[auth.uid()]);
+  USING (auth.uid() IS NOT NULL);
 
-CREATE POLICY "Users can update tasks they are assigned to"
+CREATE POLICY "Users can update tasks"
   ON tasks FOR UPDATE
-  USING (assignees @> ARRAY[auth.uid()]);
+  USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Users can insert tasks"
   ON tasks FOR INSERT
   WITH CHECK (true);
 
-CREATE POLICY "Users can delete tasks they are assigned to"
+CREATE POLICY "Users can delete tasks"
   ON tasks FOR DELETE
-  USING (assignees @> ARRAY[auth.uid()]);
+  USING (auth.uid() IS NOT NULL);
 
 -- RLS Policies for safety
 CREATE POLICY "Users can view safety entries for their tasks"
