@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getProfile } from '@/lib/actions/profile'
 import { ProfileForm, PasswordForm } from '@/components/settings/profile-form'
+import { ProcoreConnect } from '@/components/settings/procore-connect'
 import { redirect } from 'next/navigation'
 
 export default async function SettingsPage() {
@@ -100,30 +101,7 @@ export default async function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="integrations" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Procore Integration</CardTitle>
-              <CardDescription>
-                Connect your Procore account to sync project data
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between rounded-lg border border-stone-200 p-4 dark:border-stone-800">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30">
-                    <span className="text-xl font-bold text-orange-600">P</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-stone-900 dark:text-white">Procore</p>
-                    <p className="text-sm text-stone-500">Not connected</p>
-                  </div>
-                </div>
-                <Button className="bg-amber-500 hover:bg-amber-600">
-                  Connect
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ProcoreConnect />
 
           <Card>
             <CardHeader>

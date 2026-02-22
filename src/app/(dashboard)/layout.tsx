@@ -1,9 +1,13 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Sidebar } from '@/components/dashboard/sidebar'
-import { Header } from '@/components/dashboard/header'
-import { MobileNav } from '@/components/dashboard/mobile-nav'
-import type { Profile } from '@/types/database'
+import { 
+  FieldWorkerShell, 
+  ForemanShell, 
+  PMShell, 
+  SafetyShell, 
+  ExecutiveShell 
+} from '@/components/shells'
+import type { Profile, UserRole } from '@/types/database'
 
 export default async function DashboardLayout({
   children,
@@ -26,23 +30,76 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
-  return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
-      <div className="hidden md:block">
-        <Sidebar userRole={(profile as Profile | null)?.role} />
-      </div>
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, name')
+    .order('created_at', { ascending: false })
+    .limit(10)
 
-      <div className="md:pl-64">
-        <div className="flex items-center gap-4 border-b border-stone-200 bg-white px-4 md:hidden dark:border-stone-800 dark:bg-stone-950">
-          <MobileNav userRole={(profile as Profile | null)?.role} />
-        </div>
-        
-        <Header profile={profile as Profile | null} />
-        
-        <main className="p-6">
+  const typedProfile = profile as Profile | null
+  const role: UserRole = typedProfile?.role || 'field_worker'
+  const userName = typedProfile?.full_name || undefined
+  const userAvatar = typedProfile?.avatar_url || undefined
+
+  const projectsList = (projects as { id: string; name: string }[] || []).map(p => ({ id: p.id, name: p.name }))
+
+  switch (role) {
+    case 'field_worker':
+      return (
+        <FieldWorkerShell userName={userName}>
           {children}
-        </main>
-      </div>
-    </div>
-  )
+        </FieldWorkerShell>
+      )
+
+    case 'foreman':
+      return (
+        <ForemanShell 
+          userName={userName} 
+          userAvatar={userAvatar}
+          crewCount={8}
+        >
+          {children}
+        </ForemanShell>
+      )
+
+    case 'project_manager':
+      return (
+        <PMShell 
+          userName={userName}
+          userAvatar={userAvatar}
+          projects={projectsList}
+        >
+          {children}
+        </PMShell>
+      )
+
+    case 'safety_manager':
+      return (
+        <SafetyShell 
+          userName={userName}
+          userAvatar={userAvatar}
+          alertCounts={{ critical: 0, high: 2, medium: 5, low: 3 }}
+        >
+          {children}
+        </SafetyShell>
+      )
+
+    case 'executive':
+      return (
+        <ExecutiveShell userName={userName} userAvatar={userAvatar}>
+          {children}
+        </ExecutiveShell>
+      )
+
+    default:
+      return (
+        <PMShell 
+          userName={userName}
+          userAvatar={userAvatar}
+          projects={projectsList}
+        >
+          {children}
+        </PMShell>
+      )
+  }
 }

@@ -1,26 +1,47 @@
+'use client'
+
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { MapPin, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { MapPin, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ProjectCardProps {
   id: string
   name: string
-  location: string | null
+  location: string
   status: string
-  alignmentScore?: number | null
   tasksCompleted: number
   totalTasks: number
-  safetyAlerts?: number
 }
 
-const statusColors: Record<string, string> = {
-  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  completed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  on_hold: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+const statusConfig: Record<string, { label: string; className: string; dotColor: string }> = {
+  active: { 
+    label: 'Active', 
+    className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    dotColor: 'bg-emerald-500'
+  },
+  completed: { 
+    label: 'Completed', 
+    className: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    dotColor: 'bg-blue-500'
+  },
+  on_hold: { 
+    label: 'On Hold', 
+    className: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    dotColor: 'bg-amber-500'
+  },
+  planning: { 
+    label: 'Planning', 
+    className: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    dotColor: 'bg-purple-500'
+  },
+  cancelled: { 
+    label: 'Cancelled', 
+    className: 'bg-red-500/10 text-red-500 border-red-500/20',
+    dotColor: 'bg-red-500'
+  },
 }
 
 export function ProjectCard({
@@ -28,60 +49,63 @@ export function ProjectCard({
   name,
   location,
   status,
-  alignmentScore,
   tasksCompleted,
   totalTasks,
-  safetyAlerts,
 }: ProjectCardProps) {
   const progress = totalTasks > 0 ? (tasksCompleted / totalTasks) * 100 : 0
-  const statusLabel = status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  const config = statusConfig[status] || statusConfig.active
 
   return (
     <Link href={`/projects/${id}`}>
-      <Card className="transition-all hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700 cursor-pointer">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <CardTitle className="text-lg font-semibold text-stone-900 dark:text-white">
-              {name}
-            </CardTitle>
-            <Badge className={cn('text-xs', statusColors[status] || statusColors.active)}>
-              {statusLabel}
-            </Badge>
-          </div>
-          {location && (
-            <div className="flex items-center gap-1 text-sm text-stone-500 dark:text-stone-400">
-              <MapPin className="h-3.5 w-3.5" />
-              {location}
-            </div>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-stone-600 dark:text-stone-400">Task Progress</span>
-              <span className="font-medium text-stone-900 dark:text-white">
-                {tasksCompleted}/{totalTasks}
-              </span>
-            </div>
-            <Progress value={progress} className="h-2" />
+      <motion.div
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Card className="group relative cursor-pointer overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+          {/* Progress bar at top */}
+          <div className="absolute left-0 right-0 top-0 h-1 bg-muted">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="h-full bg-primary"
+            />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-stone-600 dark:text-stone-400">
-                Alignment: {alignmentScore !== null ? `${alignmentScore}%` : 'N/A'}
-              </span>
+          <CardHeader className="pb-3 pt-5">
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="text-base font-semibold text-foreground line-clamp-1">
+                {name}
+              </CardTitle>
+              <Badge 
+                variant="outline" 
+                className={cn('shrink-0 border', config.className)}
+              >
+                <span className={cn('mr-1.5 h-1.5 w-1.5 rounded-full', config.dotColor)} />
+                {config.label}
+              </Badge>
             </div>
-            {safetyAlerts && safetyAlerts > 0 && (
-              <div className="flex items-center gap-1 text-amber-600">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="text-sm font-medium">{safetyAlerts}</span>
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5" />
+              <span className="line-clamp-1">{location}</span>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-foreground">
+                  {tasksCompleted}<span className="text-muted-foreground">/{totalTasks}</span>
+                </p>
+                <p className="text-xs text-muted-foreground">tasks completed</p>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 text-muted-foreground transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                <ArrowRight className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </Link>
   )
 }

@@ -12,9 +12,25 @@ const mockAlignmentData = [
 ]
 
 const mockProjects = [
-  { name: 'Downtown Tower', alignment: 87, efficiency: 94, safety: 98 },
-  { name: 'Harbor Bridge', alignment: 92, efficiency: 88, safety: 100 },
-  { name: 'Metro Station', alignment: 74, efficiency: 82, safety: 95 },
+  { name: 'Airport Terminal B', alignment: 87, efficiency: 94, safety: 98 },
+  { name: 'Downtown Office Complex', alignment: 92, efficiency: 88, safety: 100 },
+  { name: 'Riverside Condominiums', alignment: 74, efficiency: 82, safety: 95 },
+  { name: 'Highway 101 Expansion', alignment: 91, efficiency: 96, safety: 97 },
+]
+
+const mockTradePerformance = [
+  { trade: 'Concrete', tasksCompleted: 45, avgDuration: 4.2, onTimeRate: 94 },
+  { trade: 'Electrical', tasksCompleted: 38, avgDuration: 3.8, onTimeRate: 91 },
+  { trade: 'Steel', tasksCompleted: 32, avgDuration: 6.5, onTimeRate: 88 },
+  { trade: 'Plumbing', tasksCompleted: 28, avgDuration: 3.2, onTimeRate: 96 },
+  { trade: 'HVAC', tasksCompleted: 22, avgDuration: 5.1, onTimeRate: 85 },
+]
+
+const mockWeeklyTrends = [
+  { week: 'Week 1', completion: 78, delays: 12, productivity: 82 },
+  { week: 'Week 2', completion: 82, delays: 9, productivity: 85 },
+  { week: 'Week 3', completion: 85, delays: 7, productivity: 88 },
+  { week: 'Week 4', completion: 89, delays: 5, productivity: 91 },
 ]
 
 export default function AnalyticsPage() {
@@ -184,9 +200,71 @@ export default function AnalyticsPage() {
         </TabsContent>
 
         <TabsContent value="efficiency" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Trade Performance</CardTitle>
+                <CardDescription>
+                  Tasks completed and on-time rate by trade
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockTradePerformance.map((item) => (
+                    <div key={item.trade} className="flex items-center justify-between rounded-lg border border-stone-200 p-3 dark:border-stone-800">
+                      <div>
+                        <p className="font-medium text-stone-900 dark:text-white">{item.trade}</p>
+                        <p className="text-sm text-stone-500">{item.tasksCompleted} tasks • {item.avgDuration}h avg</p>
+                      </div>
+                      <div className={`text-lg font-bold ${item.onTimeRate >= 90 ? 'text-green-600' : 'text-amber-600'}`}>
+                        {item.onTimeRate}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Weekly Productivity Trend</CardTitle>
+                <CardDescription>
+                  Completion rates improving over time
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockWeeklyTrends.map((week) => (
+                    <div key={week.week} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-stone-900 dark:text-white">{week.week}</span>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-green-600">{week.completion}% completed</span>
+                          <span className="text-red-500">{week.delays} delays</span>
+                        </div>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
+                        <div
+                          className="h-full rounded-full bg-green-500 transition-all"
+                          style={{ width: `${week.productivity}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-800">
+                  <div className="flex items-center gap-2 text-sm text-green-600">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>11% improvement over 4 weeks</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
-              <CardTitle>Task Efficiency Breakdown</CardTitle>
+              <CardTitle>Task Duration Analysis</CardTitle>
               <CardDescription>
                 Observed duration vs expected duration by task type
               </CardDescription>
