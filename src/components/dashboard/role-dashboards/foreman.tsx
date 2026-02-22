@@ -36,6 +36,16 @@ export function ForemanDashboard({ data }: Props) {
       initial="hidden"
       animate="visible"
     >
+      {/* Greeting */}
+      <motion.div variants={staggerItem}>
+        <h1 className="text-2xl font-bold text-foreground">
+          Welcome {data.firstName}: Foreman
+        </h1>
+        <p className="text-muted-foreground">
+          Managing {data.projects.length} projects with {data.totalMembers} team members
+        </p>
+      </motion.div>
+
       {/* Daily Summary */}
       <motion.div variants={staggerItem} className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-center justify-between mb-4">

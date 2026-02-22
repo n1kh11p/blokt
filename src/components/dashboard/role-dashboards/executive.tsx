@@ -48,7 +48,9 @@ export function ExecutiveDashboard({ data }: Props) {
     >
       {/* Header */}
       <motion.div variants={staggerItem}>
-        <h1 className="text-2xl font-bold text-foreground">Portfolio Overview</h1>
+        <h1 className="text-2xl font-bold text-foreground">
+          Welcome {data.firstName}: Executive
+        </h1>
         <p className="text-muted-foreground">
           {data.activeProjects.length} active projects • {data.totalMembers} team members
         </p>

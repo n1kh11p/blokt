@@ -54,7 +54,7 @@ export function PMDashboard({ data }: Props) {
       {/* Header */}
       <motion.div variants={staggerItem}>
         <h1 className="text-2xl font-bold text-foreground">
-          Welcome back, {data.firstName}
+          Welcome {data.firstName}: Project Manager
         </h1>
         <p className="text-muted-foreground">
           Here&apos;s your workspace overview

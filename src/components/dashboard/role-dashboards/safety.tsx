@@ -41,7 +41,9 @@ export function SafetyDashboard({ data }: Props) {
     >
       {/* Header */}
       <motion.div variants={staggerItem}>
-        <h1 className="text-2xl font-bold text-foreground">Safety Dashboard</h1>
+        <h1 className="text-2xl font-bold text-foreground">
+          Welcome {data.firstName}: Safety Manager
+        </h1>
         <p className="text-muted-foreground">Overview of projects and team</p>
       </motion.div>
 

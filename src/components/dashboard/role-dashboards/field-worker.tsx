@@ -36,7 +36,7 @@ export function FieldWorkerDashboard({ data }: Props) {
       {/* Greeting */}
       <motion.div variants={staggerItem}>
         <h1 className="text-2xl font-bold text-foreground">
-          Welcome, {data.firstName}
+          Welcome {data.firstName}: Field Worker
         </h1>
         <p className="text-muted-foreground">
           {data.pendingTasks.length} pending tasks across {data.projects.length} projects
