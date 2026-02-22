@@ -201,6 +201,7 @@ export interface Database {
           user_id: string
           start: string | null
           endtime: string | null
+          task_ids: string[] | null
           created_at: string | null
           updated_at: string | null
         }
@@ -210,6 +211,7 @@ export interface Database {
           user_id: string
           start?: string | null
           endtime?: string | null
+          task_ids?: string[] | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -219,6 +221,7 @@ export interface Database {
           user_id?: string
           start?: string | null
           endtime?: string | null
+          task_ids?: string[] | null
           created_at?: string | null
           updated_at?: string | null
         }
