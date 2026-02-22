@@ -10,25 +10,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { staggerContainer, staggerItem } from '@/components/core/motion'
-
-interface DashboardData {
-  firstName: string
-  projects: Array<{
-    id: string
-    name: string
-    status: string
-    planned_tasks?: Array<{ id: string; status: string; name: string }>
-  }>
-  activeProjects: Array<{
-    id: string
-    name: string
-    planned_tasks?: Array<{ id: string; status: string; name: string }>
-  }>
-  allTasks: Array<{ id: string; status: string; name: string }>
-  completedTasks: Array<{ id: string; status: string; name: string }>
-  pendingTasks: Array<{ id: string; status: string; name: string }>
-  totalMembers: number
-}
+import type { DashboardData } from '@/types/dashboard'
 
 interface Props {
   data: DashboardData
@@ -107,8 +89,9 @@ export function ExecutiveDashboard({ data }: Props) {
 
           {data.activeProjects.length > 0 ? (
             data.activeProjects.slice(0, 5).map((project, index) => {
-              const completed = project.planned_tasks?.filter(t => t.status === 'completed').length || 0
-              const total = project.planned_tasks?.length || 0
+              const projectTasks = data.allTasks.filter(t => project.task_ids?.includes(t.id))
+              const completed = projectTasks.filter(t => t.status === 'completed').length
+              const total = project.task_ids?.length || 0
               const progress = total > 0 ? Math.round((completed / total) * 100) : 0
 
               return (

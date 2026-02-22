@@ -11,29 +11,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import { staggerContainer, staggerItem } from '@/components/core/motion'
-
-interface DashboardData {
-  firstName: string
-  projects: Array<{
-    id: string
-    name: string
-    location: string | null
-    status: string
-    planned_tasks?: Array<{ id: string; status: string; name: string }>
-    project_members?: Array<{ id: string }>
-  }>
-  activeProjects: Array<{
-    id: string
-    name: string
-    location: string | null
-    status: string
-    planned_tasks?: Array<{ id: string; status: string; name: string }>
-  }>
-  allTasks: Array<{ id: string; status: string; name: string }>
-  completedTasks: Array<{ id: string; status: string; name: string }>
-  pendingTasks: Array<{ id: string; status: string; name: string }>
-  totalMembers: number
-}
+import type { DashboardData } from '@/types/dashboard'
 
 interface Props {
   data: DashboardData
@@ -104,8 +82,9 @@ export function PMDashboard({ data }: Props) {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.activeProjects.slice(0, 6).map((project, index) => {
-            const completed = project.planned_tasks?.filter(t => t.status === 'completed').length || 0
-            const total = project.planned_tasks?.length || 0
+            const projectTasks = data.allTasks.filter(t => project.task_ids?.includes(t.id))
+            const completed = projectTasks.filter(t => t.status === 'completed').length
+            const total = project.task_ids?.length || 0
             const progress = total > 0 ? (completed / total) * 100 : 0
 
             return (

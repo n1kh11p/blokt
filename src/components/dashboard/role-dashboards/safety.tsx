@@ -10,18 +10,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { staggerContainer, staggerItem } from '@/components/core/motion'
-
-interface DashboardData {
-  firstName: string
-  projects: Array<{
-    id: string
-    name: string
-  }>
-  allTasks: Array<{ id: string; status: string; name: string }>
-  completedTasks: Array<{ id: string; status: string; name: string }>
-  pendingTasks: Array<{ id: string; status: string; name: string }>
-  totalMembers: number
-}
+import type { DashboardData } from '@/types/dashboard'
 
 interface Props {
   data: DashboardData

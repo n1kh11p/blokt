@@ -9,17 +9,7 @@ import {
   FolderKanban,
 } from 'lucide-react'
 import { staggerContainer, staggerItem } from '@/components/core/motion'
-
-interface DashboardData {
-  firstName: string
-  projects: Array<{
-    id: string
-    name: string
-    planned_tasks?: Array<{ id: string; status: string; name: string }>
-  }>
-  pendingTasks: Array<{ id: string; status: string; name: string }>
-  completedTasks: Array<{ id: string; status: string; name: string }>
-}
+import type { DashboardData } from '@/types/dashboard'
 
 interface Props {
   data: DashboardData
@@ -104,8 +94,9 @@ export function FieldWorkerDashboard({ data }: Props) {
         <div className="space-y-2">
           {data.projects.length > 0 ? (
             data.projects.slice(0, 5).map((project) => {
-              const taskCount = project.planned_tasks?.length || 0
-              const completedCount = project.planned_tasks?.filter(t => t.status === 'completed').length || 0
+              const taskCount = project.task_ids?.length || 0
+              const projectTasks = data.allTasks.filter(t => project.task_ids?.includes(t.id))
+              const completedCount = projectTasks.filter(t => t.status === 'completed').length
               return (
                 <Link key={project.id} href={`/projects/${project.id}`}>
                   <div className="flex items-center justify-between rounded-xl bg-card p-4 border border-border hover:border-primary/50 transition-colors">

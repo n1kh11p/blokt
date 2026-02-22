@@ -1,19 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { FieldWorkerDashboard } from '@/components/dashboard/role-dashboards/field-worker'
 import { ForemanDashboard } from '@/components/dashboard/role-dashboards/foreman'
 import { PMDashboard } from '@/components/dashboard/role-dashboards/pm'
 import { SafetyDashboard } from '@/components/dashboard/role-dashboards/safety'
 import { ExecutiveDashboard } from '@/components/dashboard/role-dashboards/executive'
+import { getDashboardData } from '@/lib/actions/dashboard'
 import type { User, UserRole } from '@/types/database'
-
-interface Project {
-  id: string
-  name: string
-  location: string | null
-  status: string
-  task_ids?: string[]
-  user_ids?: string[]
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -22,41 +15,33 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: userRecord } = await supabase
+  if (!user) {
+    redirect('/login')
+  }
+
+  // Fetch user role
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: userRecord } = await (supabase as any)
     .from('users')
     .select('*')
-    .eq('user_id', user?.id || '')
+    .eq('user_id', user.id)
     .single()
 
   const typedProfile = userRecord as User | null
   const role: UserRole = typedProfile?.role || 'field_worker'
-  const firstName = typedProfile?.name?.split(' ')[0] || 'there'
 
-  const { data: projects } = await supabase
-    .from('projects')
-    .select('*')
-    .order('created_at', { ascending: false })
+  // Fetch dashboard data using clean API endpoint
+  const { data: dashboardData, error } = await getDashboardData()
 
-  const typedProjects = (projects || []) as Project[]
-
-  const activeProjects = typedProjects.filter(p => p.status === 'active' || p.status === 'on_hold')
-
-  // Since we don't have joined planned_tasks anymore, we need to handle it or skip it for now.
-  // The schema changed so tasks is a separate table, but dashboard only needs counts.
-  // We'll stub these out for now or fetch tasks independently if needed.
-  const allTasks: any[] = []
-  const completedTasks: any[] = []
-  const pendingTasks: any[] = []
-  const totalMembers = typedProjects.reduce((acc, p) => acc + (p.user_ids?.length || 0), 0)
-
-  const dashboardData = {
-    firstName,
-    projects: typedProjects,
-    activeProjects,
-    allTasks,
-    completedTasks,
-    pendingTasks,
-    totalMembers,
+  if (error || !dashboardData) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-foreground">Unable to load dashboard</h2>
+          <p className="text-muted-foreground mt-2">{error || 'Unknown error'}</p>
+        </div>
+      </div>
+    )
   }
 
   switch (role) {
