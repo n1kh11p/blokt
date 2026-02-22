@@ -90,11 +90,16 @@ export async function getWorkerTasks(): Promise<ApiResponse<Task[]>> {
 }
 
 // ============================================
-// UPLOAD VIDEO
-// Uploads video file to Supabase storage and creates database record
+// SAVE VIDEO RECORD
+// Creates database record after client-side upload
 // ============================================
 
-export async function uploadVideo(formData: FormData): Promise<UploadResponse> {
+export async function saveVideoRecord(
+  filePath: string,
+  start: string | null,
+  endtime: string | null,
+  taskIds: string[]
+): Promise<UploadResponse> {
   const { user, supabase, error: authError } = await getAuthenticatedUser()
 
   if (authError || !user) {
@@ -102,63 +107,33 @@ export async function uploadVideo(formData: FormData): Promise<UploadResponse> {
   }
 
   try {
-    const file = formData.get('file') as File
-    const start = formData.get('start') as string | null
-    const endtime = formData.get('endtime') as string | null
-    const taskIds = formData.get('task_ids') as string | null
-
-    if (!file) {
-      return { error: 'No file provided', success: false }
-    }
-
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
-      return { error: 'File must be a video', success: false }
-    }
-
-    // Generate unique file name
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${user.id}/${Date.now()}.${fileExt}`
-
-    // Upload to Supabase storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('videos')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      })
-
-    if (uploadError) {
-      console.error('[Upload] Storage error:', uploadError)
-      return { error: `Upload failed: ${uploadError.message}`, success: false }
-    }
-
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('videos')
-      .getPublicUrl(uploadData.path)
+    let finalUrl = filePath;
+    if (!filePath.startsWith('/uploads/')) {
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(filePath)
+      finalUrl = publicUrl;
+    }
 
-    // Parse task IDs
-    const parsedTaskIds = taskIds ? JSON.parse(taskIds) : []
+
 
     // Create database record
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: videoRecord, error: dbError } = await (supabase as any)
       .from('videos')
       .insert({
-        uri: publicUrl,
+        uri: finalUrl,
         user_id: user.id,
         start: start || null,
         endtime: endtime || null,
-        task_ids: parsedTaskIds
+        task_ids: taskIds
       })
       .select()
       .single()
 
     if (dbError) {
       console.error('[Upload] Database error:', dbError)
-      // Try to clean up uploaded file
-      await supabase.storage.from('videos').remove([uploadData.path])
       return { error: `Failed to save video record: ${dbError.message}`, success: false }
     }
 

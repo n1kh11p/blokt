@@ -12,7 +12,8 @@ import type { Task } from '@/types'
 import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
-import { getWorkerTasks, uploadVideo, processVideoAnnotations } from '@/lib/actions/upload'
+import { getWorkerTasks, saveVideoRecord, processVideoAnnotations } from '@/lib/actions/upload'
+import { createClient } from '@/lib/supabase/client'
 
 export default function UploadPage() {
   const router = useRouter()
@@ -85,81 +86,114 @@ export default function UploadPage() {
     setUploadProgress(0)
     setError(null)
 
-    // Simulate progress while uploading
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 90) return 90 // Cap at 90 until real upload finishes
-        return prev + 10
-      })
-    }, 500)
+    // Use real uploading progress via client-side storage upload (resumable)
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    const formData = new FormData()
-    formData.append('file', file)
-    if (start) formData.append('start', new Date(start).toISOString())
-    if (endtime) formData.append('endtime', new Date(endtime).toISOString())
-    formData.append('task_ids', JSON.stringify(selectedTasks))
-
-    const result = await uploadVideo(formData)
-
-    clearInterval(progressInterval)
-    setUploadProgress(100)
-
-    if (result.error || !result.success || !result.videoId) {
-      setError(result.error || 'Upload failed')
+    if (!session || !user) {
+      setError('You must be logged in to upload a video.')
       setIsUploading(false)
       return
     }
 
-    toast.success('Video uploaded successfully!', {
-      description: 'Now processing with AI to verify task completion...'
-    })
-
-    setIsProcessingAI(true)
-
-    // Call AI action to read json and update tasks
-    const aiResult = await processVideoAnnotations(result.videoId, selectedTasks)
-
-    setIsUploading(false)
-    setIsProcessingAI(false)
-    setUploadComplete(true)
-
-    if (aiResult.success && aiResult.completedTaskIds && aiResult.completedTaskIds.length > 0) {
-      const names = tasks
-        .filter(t => (aiResult.completedTaskIds as string[]).includes(t.id))
-        .map(t => t.name)
-
-      setCompletedTaskNames(names)
-
-      // Trigger Celebration
-      const duration = 3 * 1000
-      const end = Date.now() + duration
-
-      const frame = () => {
-        confetti({
-          particleCount: 5,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: ['#f59e0b', '#10b981', '#ef4444']
-        })
-        confetti({
-          particleCount: 5,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: ['#f59e0b', '#10b981', '#ef4444']
-        })
-
-        if (Date.now() < end) {
-          requestAnimationFrame(frame)
-        }
-      }
-      frame()
-
-      toast.success('Tasks Verified!', {
-        description: `AI confirmed completion of ${names.length} tasks.`,
-        icon: <Sparkles className="h-4 w-4 text-amber-500" />
+    // Simulate progress 0 -> 90 
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 90) return 90
+        return prev + 10
       })
+    }, 1000)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('userId', user.id)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to upload to local API')
+      }
+
+      clearInterval(progressInterval)
+      setUploadProgress(100)
+
+      // Send the reference to the server to create the DB record
+      const result = await saveVideoRecord(
+        data.url,
+        start ? new Date(start).toISOString() : null,
+        endtime ? new Date(endtime).toISOString() : null,
+        selectedTasks
+      )
+
+      if (result.error || !result.success || !result.videoId) {
+        setError(result.error || 'Upload failed')
+        setIsUploading(false)
+        return
+      }
+
+      toast.success('Video uploaded successfully!', {
+        description: 'Now processing with AI to verify task completion...'
+      })
+
+      setIsProcessingAI(true)
+
+      // Call AI action to read json and update tasks
+      const aiResult = await processVideoAnnotations(result.videoId, selectedTasks)
+
+      setIsUploading(false)
+      setIsProcessingAI(false)
+      setUploadComplete(true)
+
+      if (aiResult.success && aiResult.completedTaskIds && aiResult.completedTaskIds.length > 0) {
+        const names = tasks
+          .filter(t => (aiResult.completedTaskIds as string[]).includes(t.id))
+          .map(t => t.name)
+
+        setCompletedTaskNames(names)
+
+        // Trigger Celebration
+        const duration = 3 * 1000
+        const end = Date.now() + duration
+
+        const frame = () => {
+          confetti({
+            particleCount: 5,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#f59e0b', '#10b981', '#ef4444']
+          })
+          confetti({
+            particleCount: 5,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#f59e0b', '#10b981', '#ef4444']
+          })
+
+          if (Date.now() < end) {
+            requestAnimationFrame(frame)
+          }
+        }
+        frame()
+
+        toast.success('Tasks Verified!', {
+          description: `AI confirmed completion of ${names.length} tasks.`,
+          icon: <Sparkles className="h-4 w-4 text-amber-500" />
+        })
+      }
+    } catch (err: any) {
+      setError(`Upload failed: ${err.message || 'Network error'}`)
+      setIsUploading(false)
+      clearInterval(progressInterval)
+      return
     }
   }
 
@@ -213,11 +247,15 @@ export default function UploadPage() {
             )}
 
             <div className="mt-6 flex gap-3 justify-center">
-              <Button variant="outline" onClick={resetForm}>
+              <Button
+                variant="outline"
+                onClick={resetForm}
+                className="hover:bg-stone-100 transition-colors"
+              >
                 Upload Another
               </Button>
               <Button
-                className="bg-amber-500 hover:bg-amber-600"
+                className="bg-amber-500 hover:bg-amber-600 transition-colors"
                 onClick={() => router.push('/videos')}
               >
                 View Videos
@@ -282,7 +320,7 @@ export default function UploadPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setFile(null)}
-                  className="text-green-600 hover:text-green-700"
+                  className="text-green-600 hover:text-green-700 hover:bg-green-100 transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -355,11 +393,16 @@ export default function UploadPage() {
           </div>
         )}
         <div className="flex gap-3">
-          <Button variant="outline" onClick={resetForm} disabled={isUploading || isProcessingAI}>
+          <Button
+            variant="outline"
+            onClick={resetForm}
+            disabled={isUploading || isProcessingAI}
+            className="hover:bg-stone-100 transition-colors"
+          >
             Cancel
           </Button>
           <Button
-            className="bg-amber-500 hover:bg-amber-600"
+            className="bg-amber-500 hover:bg-amber-600 transition-colors"
             disabled={!file || isUploading || isProcessingAI}
             onClick={handleUpload}
           >

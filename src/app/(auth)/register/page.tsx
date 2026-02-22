@@ -57,7 +57,8 @@ export default function RegisterPage() {
     // the user record in public.users. If an invite code was provided, 
     // we now link the profile to the organization.
     if (data.user && inviteCode.trim()) {
-      const { error: updateError } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: updateError } = await (supabase as any)
         .from('users')
         .update({ organization_id: inviteCode.trim() })
         .eq('user_id', data.user.id)
