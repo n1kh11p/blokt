@@ -3,21 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export interface Safety {
-  safety_id: string
-  description: string | null
-  uri: string | null
-  task_id: string | null
-  user_id: string | null
-  timestamp: string
-  safety_name: string | null
-  created_at: string
-  updated_at: string
-}
+import type { Safety } from '@/types'
+
 
 export async function getSafetyEntries(taskId: string): Promise<{ error: string | null, data: Safety[] | null }> {
   const supabase = await createClient()
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('safety')
@@ -34,7 +25,7 @@ export async function getSafetyEntries(taskId: string): Promise<{ error: string 
 
 export async function getAllSafetyEntries(): Promise<{ error: string | null, data: Safety[] | null }> {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return { error: 'Not authenticated', data: null }
@@ -56,7 +47,7 @@ export async function getAllSafetyEntries(): Promise<{ error: string | null, dat
 
 export async function createSafetyEntry(formData: FormData) {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return { error: 'Not authenticated' }
@@ -100,7 +91,7 @@ export async function createSafetyEntry(formData: FormData) {
 
 export async function updateSafetyEntry(safetyId: string, formData: FormData) {
   const supabase = await createClient()
-  
+
   const safetyData = {
     safety_name: formData.get('safety_name') as string || null,
     description: formData.get('description') as string || null,
@@ -140,7 +131,7 @@ export async function deleteSafetyEntry(safetyId: string) {
 
 export async function getSafetyCount(): Promise<number> {
   const supabase = await createClient()
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { count } = await (supabase as any)
     .from('safety')

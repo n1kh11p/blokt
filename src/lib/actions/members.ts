@@ -3,22 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export interface User {
-  user_id: string
-  role: string | null
-  name: string | null
-  trade: string | null
-  phone: string | null
-  email: string | null
-  organization_id: string | null
-  project_ids: string[]
-  created_at: string
-  updated_at: string
-}
+import type { User } from '@/types'
+
 
 export async function getProjectMembers(projectId: string): Promise<{ error: string | null, data: User[] | null }> {
   const supabase = await createClient()
-  
+
   // Get project to get user_ids
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: project } = await (supabase as any)
@@ -46,7 +36,7 @@ export async function getProjectMembers(projectId: string): Promise<{ error: str
 
 export async function getAvailableUsers(projectId: string): Promise<{ error: string | null, data: User[] | null }> {
   const supabase = await createClient()
-  
+
   // Get current project members
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: project } = await (supabase as any)
@@ -60,7 +50,7 @@ export async function getAvailableUsers(projectId: string): Promise<{ error: str
   // Get all users that are not already members
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase as any).from('users').select('*')
-  
+
   if (memberIds.length > 0) {
     query = query.not('user_id', 'in', `(${memberIds.join(',')})`)
   }
@@ -76,7 +66,7 @@ export async function getAvailableUsers(projectId: string): Promise<{ error: str
 
 export async function addProjectMember(projectId: string, formData: FormData) {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return { error: 'Not authenticated' }
@@ -136,7 +126,7 @@ export async function addProjectMember(projectId: string, formData: FormData) {
 
 export async function updateMemberRole(userId: string, projectId: string, formData: FormData) {
   const supabase = await createClient()
-  
+
   const role = formData.get('role') as string
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,7 +145,7 @@ export async function updateMemberRole(userId: string, projectId: string, formDa
 
 export async function removeMember(userId: string, projectId: string) {
   const supabase = await createClient()
-  
+
   // Get current project
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: project } = await (supabase as any)

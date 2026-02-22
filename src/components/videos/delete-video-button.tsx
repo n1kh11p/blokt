@@ -19,17 +19,16 @@ import { Trash2 } from 'lucide-react'
 
 interface DeleteVideoButtonProps {
   videoId: string
-  projectId: string
 }
 
-export function DeleteVideoButton({ videoId, projectId }: DeleteVideoButtonProps) {
+export function DeleteVideoButton({ videoId }: DeleteVideoButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
   async function handleDelete() {
     setLoading(true)
-    const result = await deleteVideo(videoId, projectId)
-    
+    const result = await deleteVideo(videoId)
+
     if (!result.error) {
       router.push('/videos')
       router.refresh()

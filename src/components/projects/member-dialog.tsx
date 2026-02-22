@@ -25,19 +25,17 @@ import { Trash2 } from 'lucide-react'
 import { useEffect } from 'react'
 
 interface AvailableUser {
-  id: string
-  full_name: string | null
-  email: string
-  role: string
+  user_id: string
+  name: string | null
+  email: string | null
+  role: string | null
 }
 
 interface Member {
-  id: string
-  role: string
-  profiles: {
-    full_name: string | null
-    email: string
-  }
+  user_id: string
+  role: string | null
+  name: string | null
+  email: string | null
 }
 
 interface AddMemberDialogProps {
@@ -56,18 +54,18 @@ export function AddMemberDialog({ projectId, children }: AddMemberDialogProps) {
 
   useEffect(() => {
     if (!open) return
-    
+
     let cancelled = false
-    
+
     const fetchUsers = async () => {
       const result = await getAvailableUsers(projectId)
       if (!cancelled && result.data) {
         setAvailableUsers(result.data)
       }
     }
-    
+
     fetchUsers()
-    
+
     return () => { cancelled = true }
   }, [open, projectId])
 
@@ -122,11 +120,11 @@ export function AddMemberDialog({ projectId, children }: AddMemberDialogProps) {
                 <p className="text-sm text-stone-500">No available users to add</p>
               ) : (
                 <>
-                  <Select 
-                    value={selectedUserId} 
+                  <Select
+                    value={selectedUserId}
                     onValueChange={(value) => {
                       setSelectedUserId(value)
-                      const user = availableUsers.find(u => u.id === value)
+                      const user = availableUsers.find(u => u.user_id === value)
                       if (user?.role) {
                         setSelectedRole(user.role)
                       }
@@ -137,9 +135,9 @@ export function AddMemberDialog({ projectId, children }: AddMemberDialogProps) {
                     </SelectTrigger>
                     <SelectContent>
                       {availableUsers.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
+                        <SelectItem key={user.user_id} value={user.user_id}>
                           <div className="flex flex-col">
-                            <span>{user.full_name || 'No name'}</span>
+                            <span>{user.name || 'No name'}</span>
                             <span className="text-xs text-stone-500">{user.email}</span>
                           </div>
                         </SelectItem>
@@ -204,7 +202,7 @@ export function EditMemberDialog({ projectId, member, children }: EditMemberDial
     setLoading(true)
     setError(null)
 
-    const result = await updateMemberRole(member.id, projectId, formData)
+    const result = await updateMemberRole(member.user_id, projectId, formData)
 
     if (result.error) {
       setError(result.error)
@@ -221,7 +219,7 @@ export function EditMemberDialog({ projectId, member, children }: EditMemberDial
     setLoading(true)
     setError(null)
 
-    const result = await removeMember(member.id, projectId)
+    const result = await removeMember(member.user_id, projectId)
 
     if (result.error) {
       setError(result.error)
@@ -253,7 +251,7 @@ export function EditMemberDialog({ projectId, member, children }: EditMemberDial
         {deleteConfirm ? (
           <div className="space-y-4 py-4">
             <p className="text-sm text-stone-600 dark:text-stone-400">
-              Are you sure you want to remove <strong>{member.profiles?.full_name || member.profiles?.email}</strong> from this project?
+              Are you sure you want to remove <strong>{member.name || member.email}</strong> from this project?
             </p>
             {error && (
               <p className="text-sm text-red-500">{error}</p>
@@ -286,16 +284,16 @@ export function EditMemberDialog({ projectId, member, children }: EditMemberDial
 
               <div className="rounded-lg border border-stone-200 p-3 dark:border-stone-800">
                 <p className="font-medium text-stone-900 dark:text-white">
-                  {member.profiles?.full_name || 'Unknown'}
+                  {member.name || 'Unknown'}
                 </p>
                 <p className="text-sm text-stone-500">
-                  {member.profiles?.email}
+                  {member.email}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
-                <Select name="role" defaultValue={member.role}>
+                <Select name="role" defaultValue={member.role || 'field_worker'}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>

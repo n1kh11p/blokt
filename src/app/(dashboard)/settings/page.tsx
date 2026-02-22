@@ -23,12 +23,11 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      {profile.organizations && (
+      {profile.organization && (
         <Card className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
           <CardContent className="py-4">
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              <strong>Organization:</strong> {profile.organizations.name}
-              {profile.organizations.type && ` (${profile.organizations.type})`}
+              <strong>Organization ID:</strong> {profile.organization.organization_id || profile.organization.id}
             </p>
           </CardContent>
         </Card>

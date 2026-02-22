@@ -31,16 +31,16 @@ interface Task {
   name: string
   description: string | null
   status: string
-  planned_start: string
-  planned_end: string
+  start: string | null
+  end: string | null
   trade: string | null
   assigned_to: string | null
 }
 
 interface Member {
-  id: string
   user_id: string
-  profiles: { id: string; full_name: string | null; email: string }
+  name: string | null
+  email: string | null
 }
 
 interface TaskDialogProps {
@@ -93,7 +93,7 @@ export function TaskDialog({ projectId, task, children, mode }: TaskDialogProps)
 
   async function handleDelete() {
     if (!task) return
-    
+
     setLoading(true)
     setError(null)
 
@@ -213,7 +213,7 @@ export function TaskDialog({ projectId, task, children, mode }: TaskDialogProps)
                     id="planned_start"
                     name="planned_start"
                     type="date"
-                    defaultValue={task?.planned_start?.split('T')[0] || ''}
+                    defaultValue={task?.start?.split('T')[0] || ''}
                     required
                   />
                 </div>
@@ -223,7 +223,7 @@ export function TaskDialog({ projectId, task, children, mode }: TaskDialogProps)
                     id="planned_end"
                     name="planned_end"
                     type="date"
-                    defaultValue={task?.planned_end?.split('T')[0] || ''}
+                    defaultValue={task?.end?.split('T')[0] || ''}
                     required
                   />
                 </div>
@@ -249,7 +249,7 @@ export function TaskDialog({ projectId, task, children, mode }: TaskDialogProps)
                     <SelectItem value="unassigned">Unassigned</SelectItem>
                     {members.map((member) => (
                       <SelectItem key={member.user_id} value={member.user_id}>
-                        {member.profiles.full_name || member.profiles.email}
+                        {member.name || member.email}
                       </SelectItem>
                     ))}
                   </SelectContent>

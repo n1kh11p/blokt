@@ -3,23 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export interface Project {
-  id: string
-  name: string
-  location: string | null
-  description: string | null
-  status: string
-  date: string | null
-  ended_date: string | null
-  task_ids: string[]
-  user_ids: string[]
-  created_at: string
-  updated_at: string
-}
+import type { Project, Task, User } from '@/types'
+
 
 export async function getProjects(): Promise<{ error: string | null, data: Project[] | null }> {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return { error: 'Not authenticated', data: null }
@@ -40,30 +29,7 @@ export async function getProjects(): Promise<{ error: string | null, data: Proje
   return { error: null, data: data as Project[] }
 }
 
-export interface Task {
-  id: string
-  safety_id: string | null
-  name: string
-  description: string | null
-  status: string
-  start: string | null
-  end: string | null
-  assignees: string[]
-  trade: string | null
-  created_at: string
-  updated_at: string
-}
 
-export interface User {
-  user_id: string
-  role: string | null
-  name: string | null
-  trade: string | null
-  phone: string | null
-  email: string | null
-  organization_id: string | null
-  project_ids: string[]
-}
 
 export interface ProjectWithRelations extends Project {
   tasks?: Task[]
@@ -72,7 +38,7 @@ export interface ProjectWithRelations extends Project {
 
 export async function getProject(id: string): Promise<{ error: string | null, data: ProjectWithRelations | null }> {
   const supabase = await createClient()
-  
+
   // Get project
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: project, error: projectError } = await (supabase as any)
@@ -99,19 +65,19 @@ export async function getProject(id: string): Promise<{ error: string | null, da
     .select('*')
     .in('user_id', project.user_ids || [])
 
-  return { 
-    error: null, 
-    data: { 
-      ...project, 
-      tasks: tasks || [], 
-      users: users || [] 
-    } 
+  return {
+    error: null,
+    data: {
+      ...project,
+      tasks: tasks || [],
+      users: users || []
+    }
   }
 }
 
 export async function createProject(formData: FormData) {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return { error: 'Not authenticated' }
@@ -162,7 +128,7 @@ export async function createProject(formData: FormData) {
 
 export async function updateProject(id: string, formData: FormData) {
   const supabase = await createClient()
-  
+
   const projectData = {
     name: formData.get('name') as string,
     location: formData.get('location') as string || null,
@@ -189,7 +155,7 @@ export async function updateProject(id: string, formData: FormData) {
 
 export async function deleteProject(id: string) {
   const supabase = await createClient()
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('projects')
@@ -206,7 +172,7 @@ export async function deleteProject(id: string) {
 
 export async function addUserToProject(projectId: string, userId: string) {
   const supabase = await createClient()
-  
+
   // Get current project
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: project } = await (supabase as any)
@@ -250,7 +216,7 @@ export async function addUserToProject(projectId: string, userId: string) {
 
 export async function removeUserFromProject(projectId: string, userId: string) {
   const supabase = await createClient()
-  
+
   // Get current project
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: project } = await (supabase as any)

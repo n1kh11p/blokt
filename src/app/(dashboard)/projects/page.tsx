@@ -26,13 +26,13 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
   // Filter projects based on search params
   const filteredProjects = projects?.filter((project) => {
-    const matchesSearch = !params.search || 
+    const matchesSearch = !params.search ||
       project.name.toLowerCase().includes(params.search.toLowerCase()) ||
       project.location?.toLowerCase().includes(params.search.toLowerCase()) ||
       project.description?.toLowerCase().includes(params.search.toLowerCase())
-    
+
     const matchesStatus = !params.status || params.status === 'all' || project.status === params.status
-    
+
     return matchesSearch && matchesStatus
   })
 
@@ -79,7 +79,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
       <div className="grid gap-4">
         {filteredProjects?.map((project) => {
-          const statusLabel = project.status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+          const statusLabel = (project.status || 'pending').replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
 
           return (
             <Link key={project.id} href={`/projects/${project.id}`}>
@@ -91,7 +91,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                         <h3 className="text-lg font-semibold text-stone-900 dark:text-white">
                           {project.name}
                         </h3>
-                        <Badge className={statusColors[project.status]}>
+                        <Badge className={statusColors[project.status || 'pending']}>
                           {statusLabel}
                         </Badge>
                       </div>
@@ -103,10 +103,10 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                             {project.location}
                           </div>
                         )}
-                        {project.start_date && (
+                        {project.date && (
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            Started {new Date(project.start_date).toLocaleDateString()}
+                            Started {new Date(project.date).toLocaleDateString()}
                           </div>
                         )}
                       </div>

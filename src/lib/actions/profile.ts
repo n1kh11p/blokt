@@ -3,28 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export interface User {
-  user_id: string
-  role: string | null
-  name: string | null
-  trade: string | null
-  phone: string | null
-  email: string | null
-  organization_id: string | null
-  project_ids: string[]
-  created_at: string
-  updated_at: string
-}
+import type { User, Organization } from '@/types'
 
-export interface Organization {
-  id: string
-  organization_id: string | null
-  user_ids: string[]
-  project_ids: string[]
-  procore_id: string | null
-  created_at: string
-  updated_at: string
-}
 
 export interface UserWithOrg extends User {
   organization?: Organization | null
@@ -32,7 +12,7 @@ export interface UserWithOrg extends User {
 
 export async function getProfile(): Promise<{ error: string | null, data: UserWithOrg | null }> {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return { error: 'Not authenticated', data: null }
@@ -66,7 +46,7 @@ export async function getProfile(): Promise<{ error: string | null, data: UserWi
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return { error: 'Not authenticated' }
@@ -95,7 +75,7 @@ export async function updateProfile(formData: FormData) {
 
 export async function createOrganization(formData: FormData) {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return { error: 'Not authenticated' }
@@ -108,8 +88,8 @@ export async function createOrganization(formData: FormData) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: org, error: orgError } = await (supabase as any)
     .from('organizations')
-    .insert({ 
-      organization_id: orgId, 
+    .insert({
+      organization_id: orgId,
       procore_id: procoreId,
       user_ids: [user.id],
       project_ids: []
@@ -139,7 +119,7 @@ export async function createOrganization(formData: FormData) {
 
 export async function updatePassword(formData: FormData) {
   const supabase = await createClient()
-  
+
   const newPassword = formData.get('new_password') as string
   const confirmPassword = formData.get('confirm_password') as string
 
@@ -164,7 +144,7 @@ export async function updatePassword(formData: FormData) {
 
 export async function getUsers(): Promise<{ error: string | null, data: User[] | null }> {
   const supabase = await createClient()
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('users')

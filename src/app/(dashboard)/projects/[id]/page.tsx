@@ -4,18 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Calendar, 
-  Users, 
+import {
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  Users,
   CheckCircle2,
   Clock,
   AlertTriangle,
   Video
 } from 'lucide-react'
 import { getProject } from '@/lib/actions/projects'
-import { getProjectSafetyAlerts } from '@/lib/actions/safety'
+import { getSafetyEntries } from '@/lib/actions/safety'
 import { EditProjectDialog } from '@/components/projects/edit-project-dialog'
 import { TaskDialog } from '@/components/projects/task-dialog'
 import { AddMemberDialog, EditMemberDialog } from '@/components/projects/member-dialog'
@@ -36,18 +36,18 @@ interface ProjectPageProps {
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { id } = await params
   const { data: project, error } = await getProject(id)
-  const { data: safetyAlerts } = await getProjectSafetyAlerts(id)
+  const { data: safetyAlerts } = await getSafetyEntries(id)
 
   if (error || !project) {
     notFound()
   }
 
-  const statusLabel = project.status.replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
-  const taskCount = project.planned_tasks?.length || 0
-  const completedTasks = project.planned_tasks?.filter((t: { status: string }) => t.status === 'completed').length || 0
-  const memberCount = project.project_members?.length || 0
+  const statusLabel = (project.status || 'pending').replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+  const taskCount = project.tasks?.length || 0
+  const completedTasks = project.tasks?.filter((t: { status: string | null }) => t.status === 'completed').length || 0
+  const memberCount = project.users?.length || 0
   const alertCount = safetyAlerts?.length || 0
-  const videoCount = project.video_uploads?.length || 0
+  const videoCount = 0 // Videos temporarily unsupported in new schema
 
   return (
     <div className="space-y-6">
@@ -62,7 +62,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <h1 className="text-2xl font-bold text-stone-900 dark:text-white">
               {project.name}
             </h1>
-            <Badge className={statusColors[project.status]}>
+            <Badge className={statusColors[project.status || 'pending']}>
               {statusLabel}
             </Badge>
           </div>
@@ -73,10 +73,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 {project.location}
               </div>
             )}
-            {project.start_date && (
+            {project.date && (
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                Started {new Date(project.start_date).toLocaleDateString()}
+                Started {new Date(project.date).toLocaleDateString()}
               </div>
             )}
           </div>
@@ -196,31 +196,29 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {project.planned_tasks?.map((task: {
+                  {project.tasks?.map((task: {
                     id: string
                     name: string
                     description: string | null
-                    status: string
-                    planned_start: string
-                    planned_end: string
+                    status: string | null
+                    start: string | null
+                    end: string | null
                     trade: string | null
-                    assigned_to: string | null
-                    assigned_profile?: { full_name: string | null; email: string } | null
+                    assignees: string[] | null
                   }) => (
-                    <TaskDialog key={task.id} projectId={project.id} task={task} mode="edit">
+                    <TaskDialog key={task.id} projectId={project.id} task={task as any} mode="edit">
                       <div className="flex cursor-pointer items-center justify-between rounded-lg border border-stone-200 p-4 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900">
                         <div>
                           <p className="font-medium text-stone-900 dark:text-white">
                             {task.name}
                           </p>
                           <p className="text-sm text-stone-500">
-                            {new Date(task.planned_start).toLocaleDateString()} - {new Date(task.planned_end).toLocaleDateString()}
+                            {task.start && new Date(task.start).toLocaleDateString()} {task.end && `- ${new Date(task.end).toLocaleDateString()}`}
                             {task.trade && ` • ${task.trade}`}
-                            {task.assigned_profile && ` • ${task.assigned_profile.full_name || task.assigned_profile.email}`}
                           </p>
                         </div>
                         <Badge variant={task.status === 'completed' ? 'default' : 'secondary'}>
-                          {task.status}
+                          {task.status || 'pending'}
                         </Badge>
                       </div>
                     </TaskDialog>
@@ -257,26 +255,23 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {project.project_members?.map((member: {
-                    id: string
-                    role: string
-                    profiles: {
-                      full_name: string | null
-                      email: string
-                      role: string
-                    }
+                  {project.users?.map((member: {
+                    user_id: string
+                    role: string | null
+                    name: string | null
+                    email: string | null
                   }) => (
-                    <EditMemberDialog key={member.id} projectId={project.id} member={member}>
+                    <EditMemberDialog key={member.user_id} projectId={project.id} member={member as any}>
                       <div className="flex cursor-pointer items-center justify-between rounded-lg border border-stone-200 p-4 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900">
                         <div>
                           <p className="font-medium text-stone-900 dark:text-white">
-                            {member.profiles?.full_name || 'Unknown'}
+                            {member.name || 'Unknown'}
                           </p>
                           <p className="text-sm text-stone-500">
-                            {member.profiles?.email}
+                            {member.email}
                           </p>
                         </div>
-                        <Badge variant="secondary">{member.role.replace('_', ' ')}</Badge>
+                        <Badge variant="secondary">{member.role?.replace('_', ' ')}</Badge>
                       </div>
                     </EditMemberDialog>
                   ))}
@@ -310,27 +305,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2">
-                  {project.video_uploads?.map((video: {
-                    id: string
-                    file_name: string
-                    processing_status: string
-                    created_at: string
-                  }) => (
-                    <div
-                      key={video.id}
-                      className="rounded-lg border border-stone-200 p-4 dark:border-stone-800"
-                    >
-                      <p className="font-medium text-stone-900 dark:text-white">
-                        {video.file_name}
-                      </p>
-                      <p className="text-sm text-stone-500">
-                        Uploaded {new Date(video.created_at).toLocaleDateString()}
-                      </p>
-                      <Badge className="mt-2" variant="secondary">
-                        {video.processing_status}
-                      </Badge>
-                    </div>
-                  ))}
+                  <p className="text-sm text-stone-500">Video uploads not yet migrated to new API.</p>
                 </div>
               )}
             </CardContent>
@@ -359,7 +334,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {safetyAlerts?.map((alert) => (
+                  {safetyAlerts?.map((alert: any) => (
                     <SafetyAlertCard key={alert.id} alert={alert} />
                   ))}
                 </div>

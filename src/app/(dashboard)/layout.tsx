@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { 
-  FieldWorkerShell, 
-  ForemanShell, 
-  PMShell, 
-  SafetyShell, 
-  ExecutiveShell 
+import {
+  FieldWorkerShell,
+  ForemanShell,
+  PMShell,
+  SafetyShell,
+  ExecutiveShell
 } from '@/components/shells'
-import type { Profile, UserRole } from '@/types/database'
+import type { User, UserRole } from '@/types/database'
 
 export default async function DashboardLayout({
   children,
@@ -24,10 +24,10 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
+  const { data: userRecord } = await supabase
+    .from('users')
     .select('*')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
     .single()
 
   const { data: projects } = await supabase
@@ -36,10 +36,10 @@ export default async function DashboardLayout({
     .order('created_at', { ascending: false })
     .limit(10)
 
-  const typedProfile = profile as Profile | null
+  const typedProfile = userRecord as User | null
   const role: UserRole = typedProfile?.role || 'field_worker'
-  const userName = typedProfile?.full_name || undefined
-  const userAvatar = typedProfile?.avatar_url || undefined
+  const userName = typedProfile?.name || undefined
+  const userAvatar = undefined // Avatar removed from schema
 
   const projectsList = (projects as { id: string; name: string }[] || []).map(p => ({ id: p.id, name: p.name }))
 
@@ -53,8 +53,8 @@ export default async function DashboardLayout({
 
     case 'foreman':
       return (
-        <ForemanShell 
-          userName={userName} 
+        <ForemanShell
+          userName={userName}
           userAvatar={userAvatar}
           crewCount={8}
         >
@@ -64,7 +64,7 @@ export default async function DashboardLayout({
 
     case 'project_manager':
       return (
-        <PMShell 
+        <PMShell
           userName={userName}
           userAvatar={userAvatar}
           projects={projectsList}
@@ -75,7 +75,7 @@ export default async function DashboardLayout({
 
     case 'safety_manager':
       return (
-        <SafetyShell 
+        <SafetyShell
           userName={userName}
           userAvatar={userAvatar}
           alertCounts={{ critical: 0, high: 2, medium: 5, low: 3 }}
@@ -93,7 +93,7 @@ export default async function DashboardLayout({
 
     default:
       return (
-        <PMShell 
+        <PMShell
           userName={userName}
           userAvatar={userAvatar}
           projects={projectsList}

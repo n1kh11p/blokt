@@ -30,9 +30,8 @@ interface Project {
   name: string
   location: string | null
   description: string | null
-  status: string
-  start_date: string | null
-  end_date: string | null
+  status: string | null
+  date: string | null
 }
 
 interface EditProjectDialogProps {
@@ -165,7 +164,7 @@ export function EditProjectDialog({ project, children }: EditProjectDialogProps)
 
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select name="status" defaultValue={project.status}>
+                <Select name="status" defaultValue={project.status || 'active'}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
@@ -178,25 +177,14 @@ export function EditProjectDialog({ project, children }: EditProjectDialogProps)
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="start_date">Start Date</Label>
-                  <Input
-                    id="start_date"
-                    name="start_date"
-                    type="date"
-                    defaultValue={project.start_date?.split('T')[0] || ''}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="end_date">End Date</Label>
-                  <Input
-                    id="end_date"
-                    name="end_date"
-                    type="date"
-                    defaultValue={project.end_date?.split('T')[0] || ''}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="date">Date</Label>
+                <Input
+                  id="date"
+                  name="date"
+                  type="date"
+                  defaultValue={project.date?.split('T')[0] || ''}
+                />
               </div>
             </div>
 

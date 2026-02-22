@@ -14,21 +14,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { 
-  Bell, 
-  LogOut, 
-  Settings, 
-  User, 
-  Search, 
+import {
+  Bell,
+  LogOut,
+  Settings,
+  User,
+  Search,
   X,
   ChevronRight,
   Menu,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Profile } from '@/types/database'
+import type { User as UserType } from '@/types'
 
 interface HeaderProps {
-  profile?: Profile | null
+  profile?: UserType | null
 }
 
 const routeLabels: Record<string, string> = {
@@ -56,15 +56,15 @@ export function Header({ profile }: HeaderProps) {
     router.refresh()
   }
 
-  const initials = profile?.full_name
+  const initials = profile?.name
     ?.split(' ')
-    .map((n) => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase() || 'U'
 
   const roleLabel = profile?.role
     ?.split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 
   const pathSegments = pathname.split('/').filter(Boolean)
@@ -159,7 +159,7 @@ export function Header({ profile }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                <motion.span 
+                <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white"
@@ -193,7 +193,6 @@ export function Header({ profile }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
                 <Avatar className="h-9 w-9 border-2 border-primary/20">
-                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
                   <AvatarFallback className="bg-primary/10 text-primary font-medium">{initials}</AvatarFallback>
                 </Avatar>
               </Button>
@@ -201,7 +200,7 @@ export function Header({ profile }: HeaderProps) {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{profile?.full_name || 'User'}</p>
+                  <p className="text-sm font-medium leading-none">{profile?.name || 'User'}</p>
                   <p className="text-xs leading-none text-muted-foreground">{profile?.email}</p>
                   <p className="text-xs leading-none text-primary font-medium">{roleLabel}</p>
                 </div>

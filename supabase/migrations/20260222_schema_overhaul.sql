@@ -89,6 +89,19 @@ CREATE TABLE tasks (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ============================================
+-- 6. VIDEOS TABLE
+-- ============================================
+CREATE TABLE videos (
+  video_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  uri TEXT NOT NULL,
+  user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+  start TIMESTAMPTZ,
+  endtime TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Add the task_id foreign key to safety table now that tasks exists
 ALTER TABLE safety 
 ADD CONSTRAINT safety_task_id_fkey 
@@ -103,6 +116,7 @@ CREATE INDEX idx_projects_status ON projects(status);
 CREATE INDEX idx_tasks_status ON tasks(status);
 CREATE INDEX idx_safety_task ON safety(task_id);
 CREATE INDEX idx_safety_user ON safety(user_id);
+CREATE INDEX idx_videos_user ON videos(user_id);
 
 -- ============================================
 -- ROW LEVEL SECURITY
@@ -112,6 +126,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE safety ENABLE ROW LEVEL SECURITY;
+ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for organizations
 CREATE POLICY "Users can view their organization"
@@ -185,6 +200,23 @@ CREATE POLICY "Users can update their safety entries"
   ON safety FOR UPDATE
   USING (user_id = auth.uid());
 
+-- RLS Policies for videos
+CREATE POLICY "Users can view their own videos"
+  ON videos FOR SELECT
+  USING (user_id = auth.uid());
+
+CREATE POLICY "Users can insert their own videos"
+  ON videos FOR INSERT
+  WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can delete their own videos"
+  ON videos FOR DELETE
+  USING (user_id = auth.uid());
+
+CREATE POLICY "Users can update their own videos"
+  ON videos FOR UPDATE
+  USING (user_id = auth.uid());
+
 -- ============================================
 -- TRIGGER: Auto-update updated_at timestamp
 -- ============================================
@@ -214,6 +246,10 @@ CREATE TRIGGER update_tasks_updated_at
 
 CREATE TRIGGER update_safety_updated_at
   BEFORE UPDATE ON safety
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_videos_updated_at
+  BEFORE UPDATE ON videos
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================

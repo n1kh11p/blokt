@@ -1,14 +1,5 @@
 export * from './database'
 
-export interface User {
-  id: string
-  email: string
-  fullName: string | null
-  role: import('./database').UserRole
-  organizationId: string | null
-  avatarUrl: string | null
-}
-
 export interface DashboardStats {
   activeProjects: number
   todayAlignmentScore: number
@@ -29,18 +20,16 @@ export interface ProjectSummary {
 
 export interface TaskWithProgress {
   id: string
-  project_id: string
+  safety_id: string | null
   name: string
   description: string | null
-  planned_start: string
-  planned_end: string
-  location_context: string | null
+  status: 'pending' | 'in_progress' | 'completed' | 'delayed' | null
+  start: string | null
+  end: string | null
+  assignees: string[] | null
   trade: string | null
-  status: 'pending' | 'in_progress' | 'completed' | 'delayed'
-  procore_task_id: string | null
-  created_at: string
-  updated_at: string
-  observedEvents?: import('./database').ObservedEvent[]
+  created_at: string | null
+  updated_at: string | null
   progress: number
 }
 

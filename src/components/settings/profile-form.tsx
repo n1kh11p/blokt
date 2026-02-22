@@ -7,10 +7,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { updateProfile, updatePassword } from '@/lib/actions/profile'
-import type { ProfileWithOrg } from '@/lib/actions/profile'
+import type { UserWithOrg } from '@/lib/actions/profile'
 
 interface ProfileFormProps {
-  profile: ProfileWithOrg
+  profile: UserWithOrg
 }
 
 export function ProfileForm({ profile }: ProfileFormProps) {
@@ -46,22 +46,21 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       <CardContent>
         <form onSubmit={handleProfileSubmit} className="space-y-4">
           {message && (
-            <div className={`rounded-lg p-3 text-sm ${
-              message.type === 'success' 
-                ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-            }`}>
+            <div className={`rounded-lg p-3 text-sm ${message.type === 'success'
+              ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+              : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+              }`}>
               {message.text}
             </div>
           )}
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="full_name">Full Name</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
-                id="full_name"
-                name="full_name"
-                defaultValue={profile.full_name || ''}
+                id="name"
+                name="name"
+                defaultValue={profile.name || ''}
                 placeholder="John Smith"
               />
             </div>
@@ -70,7 +69,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               <Input
                 id="email"
                 type="email"
-                defaultValue={profile.email}
+                defaultValue={profile.email || ''}
                 disabled
                 className="bg-stone-50 dark:bg-stone-900"
               />
@@ -96,7 +95,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             </div>
           </div>
           <div className="flex justify-end">
-            <Button 
+            <Button
               type="submit"
               className="bg-amber-500 hover:bg-amber-600"
               disabled={isLoading}
@@ -142,15 +141,14 @@ export function PasswordForm() {
       <CardContent>
         <form onSubmit={handlePasswordSubmit} className="space-y-4">
           {message && (
-            <div className={`rounded-lg p-3 text-sm ${
-              message.type === 'success' 
-                ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-            }`}>
+            <div className={`rounded-lg p-3 text-sm ${message.type === 'success'
+              ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+              : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+              }`}>
               {message.text}
             </div>
           )}
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="new_password">New Password</Label>

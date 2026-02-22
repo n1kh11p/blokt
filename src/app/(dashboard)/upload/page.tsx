@@ -1,19 +1,12 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Upload, Video, X, CheckCircle2, Loader2 } from 'lucide-react'
-
-const mockProjects = [
-  { id: '1', name: 'Downtown Tower' },
-  { id: '2', name: 'Harbor Bridge Expansion' },
-  { id: '3', name: 'Metro Station Renovation' },
-]
+import { Upload, CheckCircle2, Loader2, Link as LinkIcon } from 'lucide-react'
 
 const mockTasks = [
   { id: '1', name: 'Electrical conduit installation' },
@@ -25,39 +18,12 @@ const mockTasks = [
 ]
 
 export default function UploadPage() {
-  const [selectedProject, setSelectedProject] = useState('')
-  const [recordingDate, setRecordingDate] = useState('')
+  const [uri, setUri] = useState('')
+  const [start, setStart] = useState('')
+  const [endtime, setEndtime] = useState('')
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
-  const [file, setFile] = useState<File | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadComplete, setUploadComplete] = useState(false)
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }, [])
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }, [])
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const droppedFile = e.dataTransfer.files[0]
-    if (droppedFile && droppedFile.type.startsWith('video/')) {
-      setFile(droppedFile)
-    }
-  }, [])
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
-    if (selectedFile) {
-      setFile(selectedFile)
-    }
-  }
 
   const toggleTask = (taskId: string) => {
     setSelectedTasks((prev) =>
@@ -68,19 +34,28 @@ export default function UploadPage() {
   }
 
   const handleUpload = async () => {
-    if (!file || !selectedProject || !recordingDate) return
+    if (!uri) return
 
     setIsUploading(true)
-    // Simulate upload
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    const formData = new FormData()
+    formData.append('uri', uri)
+    if (start) formData.append('start', new Date(start).toISOString())
+    if (endtime) formData.append('endtime', new Date(endtime).toISOString())
+
+    // In the future this could save mockTasks to an API endpoint relation
+
+    const { createVideoRecord } = await import('@/lib/actions/videos')
+    await createVideoRecord(formData)
+
     setIsUploading(false)
     setUploadComplete(true)
   }
 
   const resetForm = () => {
-    setFile(null)
-    setSelectedProject('')
-    setRecordingDate('')
+    setUri('')
+    setStart('')
+    setEndtime('')
     setSelectedTasks([])
     setUploadComplete(false)
   }
@@ -125,99 +100,55 @@ export default function UploadPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Video Upload</CardTitle>
+            <CardTitle>Video Details</CardTitle>
             <CardDescription>
-              Drag and drop your bodycam footage or click to browse
+              Provide the URI for your bodycam footage or video
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
-                isDragging
-                  ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/10'
-                  : file
-                  ? 'border-green-500 bg-green-50 dark:bg-green-900/10'
-                  : 'border-stone-300 hover:border-stone-400 dark:border-stone-700'
-              }`}
-            >
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleFileSelect}
-                className="absolute inset-0 cursor-pointer opacity-0"
-              />
-              {file ? (
-                <div className="flex flex-col items-center gap-2 p-4 text-center">
-                  <Video className="h-10 w-10 text-green-600 dark:text-green-400" />
-                  <div>
-                    <p className="font-medium text-stone-900 dark:text-white">{file.name}</p>
-                    <p className="text-sm text-stone-500">
-                      {(file.size / (1024 * 1024)).toFixed(2)} MB
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setFile(null)
-                    }}
-                  >
-                    <X className="mr-1 h-4 w-4" />
-                    Remove
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2 p-4 text-center">
-                  <Upload className="h-10 w-10 text-stone-400" />
-                  <div>
-                    <p className="font-medium text-stone-900 dark:text-white">
-                      Drop your video here
-                    </p>
-                    <p className="text-sm text-stone-500">or click to browse</p>
-                  </div>
-                  <p className="text-xs text-stone-400">MP4, MOV, AVI up to 10GB</p>
-                </div>
-              )}
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="uri">Video URI / URL *</Label>
+              <div className="relative">
+                <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
+                <Input
+                  id="uri"
+                  placeholder="https://example.com/video.mp4"
+                  className="pl-9"
+                  value={uri}
+                  onChange={(e) => setUri(e.target.value)}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Recording Details</CardTitle>
+            <CardTitle>Recording Timeline</CardTitle>
             <CardDescription>
-              Provide context about when and where this footage was recorded
+              Provide context about when this footage was recorded
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="project">Project</Label>
-              <Select value={selectedProject} onValueChange={setSelectedProject}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a project" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockProjects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="date">Recording Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={recordingDate}
-                onChange={(e) => setRecordingDate(e.target.value)}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start">Start Time</Label>
+                <Input
+                  id="start"
+                  type="datetime-local"
+                  value={start}
+                  onChange={(e) => setStart(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endtime">End Time</Label>
+                <Input
+                  id="endtime"
+                  type="datetime-local"
+                  value={endtime}
+                  onChange={(e) => setEndtime(e.target.value)}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -238,11 +169,10 @@ export default function UploadPage() {
                 <Badge
                   key={task.id}
                   variant={isSelected ? 'default' : 'outline'}
-                  className={`cursor-pointer transition-all ${
-                    isSelected
+                  className={`cursor-pointer transition-all ${isSelected
                       ? 'bg-amber-500 hover:bg-amber-600'
                       : 'hover:border-amber-500 hover:text-amber-600'
-                  }`}
+                    }`}
                   onClick={() => toggleTask(task.id)}
                 >
                   {isSelected && <CheckCircle2 className="mr-1 h-3 w-3" />}
@@ -265,7 +195,7 @@ export default function UploadPage() {
         </Button>
         <Button
           className="bg-amber-500 hover:bg-amber-600"
-          disabled={!file || !selectedProject || !recordingDate || isUploading}
+          disabled={!uri || isUploading}
           onClick={handleUpload}
         >
           {isUploading ? (

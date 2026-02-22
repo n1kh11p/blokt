@@ -22,10 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { createSafetyAlert } from '@/lib/actions/safety'
+import { createSafetyEntry } from '@/lib/actions/safety'
 import { getProjects } from '@/lib/actions/projects'
 import { getProjectMembers } from '@/lib/actions/members'
-import { getProjectVideos } from '@/lib/actions/videos'
 import { Plus } from 'lucide-react'
 
 interface Project {
@@ -35,12 +34,8 @@ interface Project {
 
 interface Member {
   user_id: string
-  profiles: { full_name: string | null; email: string }
-}
-
-interface Video {
-  id: string
-  file_name: string
+  name: string | null
+  email: string | null
 }
 
 export function CreateSafetyAlertDialog() {
@@ -50,8 +45,7 @@ export function CreateSafetyAlertDialog() {
   const [error, setError] = useState<string | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [members, setMembers] = useState<Member[]>([])
-  const [videos, setVideos] = useState<Video[]>([])
-  const [selectedProject, setSelectedProject] = useState<string>('')
+  const [selectedTask, setSelectedTask] = useState<string>('')
 
   useEffect(() => {
     if (!open) return
@@ -65,28 +59,26 @@ export function CreateSafetyAlertDialog() {
   }, [open])
 
   useEffect(() => {
-    if (!selectedProject) return
+    if (!selectedTask) return
     let cancelled = false
     const fetchProjectData = async () => {
-      const [membersResult, videosResult] = await Promise.all([
-        getProjectMembers(selectedProject),
-        getProjectVideos(selectedProject),
-      ])
+      // Get the correct members using the parent task/project info later, 
+      // mocking global load for now
+      const membersResult = await getProjectMembers(selectedTask)
+
       if (!cancelled) {
         if (membersResult.data) setMembers(membersResult.data as Member[])
-        if (videosResult.data) setVideos(videosResult.data)
       }
     }
     fetchProjectData()
     return () => { cancelled = true }
-  }, [selectedProject])
+  }, [selectedTask])
 
   function handleOpenChange(isOpen: boolean) {
     setOpen(isOpen)
     if (!isOpen) {
-      setSelectedProject('')
+      setSelectedTask('')
       setMembers([])
-      setVideos([])
       setError(null)
     }
   }
@@ -97,7 +89,7 @@ export function CreateSafetyAlertDialog() {
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-    const result = await createSafetyAlert(formData)
+    const result = await createSafetyEntry(formData)
 
     if (result.error) {
       setError(result.error)
@@ -133,49 +125,25 @@ export function CreateSafetyAlertDialog() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="project_id">Project *</Label>
-              <Select 
-                name="project_id" 
-                value={selectedProject} 
-                onValueChange={setSelectedProject}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select project" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="violation_type">Violation Type *</Label>
+              <Label htmlFor="task_id">Task Reference *</Label>
               <Input
-                id="violation_type"
-                name="violation_type"
-                placeholder="e.g., Missing Hard Hat"
+                id="task_id"
+                name="task_id"
+                placeholder="Task UUID"
+                value={selectedTask}
+                onChange={(e) => setSelectedTask(e.target.value)}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="severity">Severity *</Label>
-              <Select name="severity" defaultValue="medium" required>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="safety_name">Safety Issue Name *</Label>
+              <Input
+                id="safety_name"
+                name="safety_name"
+                placeholder="e.g., Missing Hard Hat"
+                required
+              />
             </div>
 
             <div className="space-y-2">
@@ -188,17 +156,17 @@ export function CreateSafetyAlertDialog() {
               />
             </div>
 
-            {selectedProject && members.length > 0 && (
+            {selectedTask && members.length > 0 && (
               <div className="space-y-2">
-                <Label htmlFor="worker_id">Worker Involved</Label>
-                <Select name="worker_id">
+                <Label htmlFor="user_id">Worker Involved</Label>
+                <Select name="user_id">
                   <SelectTrigger>
                     <SelectValue placeholder="Select worker (optional)" />
                   </SelectTrigger>
                   <SelectContent>
                     {members.map((member) => (
                       <SelectItem key={member.user_id} value={member.user_id}>
-                        {member.profiles.full_name || member.profiles.email}
+                        {member.name || member.email}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -206,23 +174,10 @@ export function CreateSafetyAlertDialog() {
               </div>
             )}
 
-            {selectedProject && videos.length > 0 && (
-              <div className="space-y-2">
-                <Label htmlFor="video_upload_id">Related Video</Label>
-                <Select name="video_upload_id">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select video (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {videos.map((video) => (
-                      <SelectItem key={video.id} value={video.id}>
-                        {video.file_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="uri">URI</Label>
+              <Input id="uri" name="uri" placeholder="Associated documentation or resource URL" />
+            </div>
           </div>
 
           <DialogFooter>
