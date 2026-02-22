@@ -3,25 +3,34 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export interface ProfileWithOrg {
-  id: string
-  email: string
-  full_name: string | null
-  role: string
-  organization_id: string | null
+export interface User {
+  user_id: string
+  role: string | null
+  name: string | null
   trade: string | null
   phone: string | null
-  avatar_url: string | null
+  email: string | null
+  organization_id: string | null
+  project_ids: string[]
   created_at: string
   updated_at: string
-  organizations: {
-    id: string
-    name: string
-    type: string | null
-  } | null
 }
 
-export async function getProfile(): Promise<{ error: string | null, data: ProfileWithOrg | null }> {
+export interface Organization {
+  id: string
+  organization_id: string | null
+  user_ids: string[]
+  project_ids: string[]
+  procore_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface UserWithOrg extends User {
+  organization?: Organization | null
+}
+
+export async function getProfile(): Promise<{ error: string | null, data: UserWithOrg | null }> {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -31,16 +40,28 @@ export async function getProfile(): Promise<{ error: string | null, data: Profil
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
-    .from('profiles')
-    .select('*, organizations(*)')
-    .eq('id', user.id)
+    .from('users')
+    .select('*')
+    .eq('user_id', user.id)
     .single()
 
   if (error) {
     return { error: error.message, data: null }
   }
 
-  return { error: null, data: data as ProfileWithOrg }
+  // Get organization if user has one
+  let organization = null
+  if (data?.organization_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: org } = await (supabase as any)
+      .from('organizations')
+      .select('*')
+      .eq('id', data.organization_id)
+      .single()
+    organization = org
+  }
+
+  return { error: null, data: { ...data, organization } as UserWithOrg }
 }
 
 export async function updateProfile(formData: FormData) {
@@ -52,16 +73,16 @@ export async function updateProfile(formData: FormData) {
   }
 
   const profileData = {
-    full_name: formData.get('full_name') as string,
+    name: formData.get('name') as string,
     phone: formData.get('phone') as string || null,
     trade: formData.get('trade') as string || null,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
-    .from('profiles')
+    .from('users')
     .update(profileData)
-    .eq('id', user.id)
+    .eq('user_id', user.id)
 
   if (error) {
     return { error: error.message }
@@ -80,14 +101,19 @@ export async function createOrganization(formData: FormData) {
     return { error: 'Not authenticated' }
   }
 
-  const orgName = formData.get('name') as string
-  const orgType = formData.get('type') as string || null
+  const orgId = formData.get('organization_id') as string || null
+  const procoreId = formData.get('procore_id') as string || null
 
   // Create the organization
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: org, error: orgError } = await (supabase as any)
     .from('organizations')
-    .insert({ name: orgName, type: orgType })
+    .insert({ 
+      organization_id: orgId, 
+      procore_id: procoreId,
+      user_ids: [user.id],
+      project_ids: []
+    })
     .select()
     .single()
 
@@ -97,13 +123,13 @@ export async function createOrganization(formData: FormData) {
 
   // Link the user to the organization
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: profileError } = await (supabase as any)
-    .from('profiles')
+  const { error: userError } = await (supabase as any)
+    .from('users')
     .update({ organization_id: org.id })
-    .eq('id', user.id)
+    .eq('user_id', user.id)
 
-  if (profileError) {
-    return { error: profileError.message }
+  if (userError) {
+    return { error: userError.message }
   }
 
   revalidatePath('/settings')
@@ -134,4 +160,20 @@ export async function updatePassword(formData: FormData) {
   }
 
   return { error: null }
+}
+
+export async function getUsers(): Promise<{ error: string | null, data: User[] | null }> {
+  const supabase = await createClient()
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('users')
+    .select('*')
+    .order('name', { ascending: true })
+
+  if (error) {
+    return { error: error.message, data: null }
+  }
+
+  return { error: null, data: data as User[] }
 }

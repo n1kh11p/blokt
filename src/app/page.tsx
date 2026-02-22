@@ -1,158 +1,213 @@
 import Link from 'next/link'
-import { HardHat, Shield, BarChart3, Upload, ArrowRight, CheckCircle2 } from 'lucide-react'
+import Image from 'next/image'
+import { Shield, BarChart3, Upload, ArrowRight, Zap, Users, Clock } from 'lucide-react'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
-      <header className="border-b border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-950">
+    <div className="min-h-screen bg-black text-white">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500">
-              <HardHat className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-stone-900 dark:text-white">Blokt</span>
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="Blokt" width={36} height={36} className="h-9 w-9" />
+            <span className="text-xl font-bold">Blokt</span>
           </div>
           <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="text-sm font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white"
+              className="text-sm font-medium text-white/70 hover:text-white transition-colors"
             >
-              Sign In
+              Log In
             </Link>
             <Link
               href="/register"
-              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Get Started
+              Sign Up
             </Link>
           </div>
         </div>
-      </header>
+      </nav>
 
       <main>
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl lg:text-6xl dark:text-white">
-              Construction Intelligence
-              <br />
-              <span className="text-amber-500">Powered by AI</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-stone-600 dark:text-stone-400">
-              Transform field activity into structured, actionable data. Automate documentation,
-              improve safety compliance, and gain real-time visibility into project execution.
-            </p>
-            <div className="mt-10 flex items-center justify-center gap-4">
-              <Link
-                href="/register"
-                className="flex items-center gap-2 rounded-lg bg-amber-500 px-6 py-3 text-base font-medium text-white hover:bg-amber-600"
-              >
-                Start Free Trial
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/login"
-                className="rounded-lg border border-stone-300 px-6 py-3 text-base font-medium text-stone-700 hover:bg-stone-100 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
-              >
-                Sign In
-              </Link>
+        {/* Hero Section */}
+        <section className="relative pt-32 pb-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent" />
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center max-w-4xl mx-auto">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight">
+                Reinventing Jira
+                <br />
+                <span className="text-primary">for Construction</span>
+              </h1>
+              <p className="mt-6 text-xl text-white/60 max-w-2xl mx-auto">
+                The modern project management platform built specifically for construction teams. 
+                Track progress, manage tasks, and deliver projects on time.
+              </p>
+              <div className="mt-10 flex items-center justify-center gap-4">
+                <Link
+                  href="/register"
+                  className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  Get Started Free
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="rounded-lg border border-white/20 px-6 py-3 text-base font-medium text-white hover:bg-white/10 transition-colors"
+                >
+                  View Demo
+                </Link>
+              </div>
+            </div>
+
+            {/* Product Screenshot */}
+            <div className="mt-20 relative">
+              <div className="absolute -inset-4 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none" />
+              <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl shadow-primary/20">
+                <Image
+                  src="/dashboard-preview.png"
+                  alt="Blokt Dashboard"
+                  width={1400}
+                  height={900}
+                  className="w-full"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="border-t border-stone-200 bg-white py-20 dark:border-stone-800 dark:bg-stone-900">
+        {/* Stats Section */}
+        <section className="py-20 border-t border-white/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-stone-900 dark:text-white">
-                Everything you need for field intelligence
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {[
+                { value: '500+', label: 'Projects Managed' },
+                { value: '50K+', label: 'Tasks Completed' },
+                { value: '98%', label: 'On-Time Delivery' },
+                { value: '2.5x', label: 'Productivity Boost' },
+              ].map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <p className="text-4xl font-bold text-primary">{stat.value}</p>
+                  <p className="mt-2 text-sm text-white/60">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-20 bg-white/5">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold">
+                Everything you need to manage construction projects
               </h2>
-              <p className="mt-4 text-stone-600 dark:text-stone-400">
-                Built for construction teams who want to understand what&apos;s really happening on site
+              <p className="mt-4 text-white/60 max-w-2xl mx-auto">
+                Purpose-built tools for the unique challenges of construction project management
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-800">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                  <Upload className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  icon: BarChart3,
+                  title: 'Real-time Analytics',
+                  description: 'Track project progress, task completion rates, and team performance with live dashboards.',
+                },
+                {
+                  icon: Users,
+                  title: 'Team Management',
+                  description: 'Assign tasks to crews, track workloads, and manage resources across multiple projects.',
+                },
+                {
+                  icon: Shield,
+                  title: 'Safety Compliance',
+                  description: 'Monitor safety incidents, track compliance, and ensure OSHA requirements are met.',
+                },
+                {
+                  icon: Upload,
+                  title: 'Document Management',
+                  description: 'Upload plans, photos, and videos. Keep all project documentation in one place.',
+                },
+                {
+                  icon: Clock,
+                  title: 'Schedule Tracking',
+                  description: 'Create timelines, set milestones, and track progress against your project schedule.',
+                },
+                {
+                  icon: Zap,
+                  title: 'Procore Integration',
+                  description: 'Sync seamlessly with Procore for unified project data across platforms.',
+                },
+              ].map((feature) => (
+                <div
+                  key={feature.title}
+                  className="rounded-xl border border-white/10 bg-white/5 p-6 hover:bg-white/10 transition-colors"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/20">
+                    <feature.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold">{feature.title}</h3>
+                  <p className="mt-2 text-sm text-white/60">{feature.description}</p>
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-stone-900 dark:text-white">
-                  Easy Upload
-                </h3>
-                <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-                  Workers upload bodycam footage with simple task tagging for automated documentation
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-800">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                  <BarChart3 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-stone-900 dark:text-white">
-                  Execution Analytics
-                </h3>
-                <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-                  Compare planned vs actual work with alignment scores and efficiency metrics
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-800">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-                  <Shield className="h-6 w-6 text-red-600 dark:text-red-400" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-stone-900 dark:text-white">
-                  Safety Monitoring
-                </h3>
-                <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-                  AI-powered OSHA compliance detection with real-time alerts and trend reporting
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-800">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-stone-900 dark:text-white">
-                  Procore Integration
-                </h3>
-                <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-                  Sync with your existing Procore projects, schedules, and daily logs seamlessly
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
+        {/* Testimonial Section */}
         <section className="py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl bg-amber-500 p-8 text-center sm:p-12">
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Ready to transform your field operations?
+            <div className="rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-8 sm:p-12 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-medium max-w-3xl mx-auto">
+                &ldquo;Blokt transformed how we manage our construction projects. We&apos;ve cut admin time by 60% and improved on-time delivery to 98%.&rdquo;
+              </blockquote>
+              <div className="mt-8">
+                <p className="font-semibold">Michael Chen</p>
+                <p className="text-white/60">VP of Operations, Turner Construction</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 border-t border-white/10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold">
+                Ready to modernize your construction management?
               </h2>
-              <p className="mt-4 text-amber-100">
-                Join construction teams already using Blokt to improve execution and safety
+              <p className="mt-4 text-white/60">
+                Join thousands of construction teams already using Blokt
               </p>
-              <Link
-                href="/register"
-                className="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-medium text-amber-600 hover:bg-amber-50"
-              >
-                Get Started Free
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              <div className="mt-8 flex items-center justify-center gap-4">
+                <Link
+                  href="/register"
+                  className="flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  Start Free Trial
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </div>
+              <p className="mt-4 text-sm text-white/40">
+                No credit card required • 14-day free trial • Cancel anytime
+              </p>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-stone-200 bg-white py-8 dark:border-stone-800 dark:bg-stone-950">
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded bg-amber-500">
-                <HardHat className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-semibold text-stone-900 dark:text-white">Blokt</span>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Image src="/logo.png" alt="Blokt" width={28} height={28} className="h-7 w-7" />
+              <span className="font-semibold">Blokt</span>
             </div>
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-white/40">
               © 2026 Blokt. Construction Intelligence Platform.
             </p>
           </div>

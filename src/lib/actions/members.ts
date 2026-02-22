@@ -3,60 +3,75 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export interface Member {
-  id: string
-  project_id: string
+export interface User {
   user_id: string
-  role: string
+  role: string | null
+  name: string | null
+  trade: string | null
+  phone: string | null
+  email: string | null
+  organization_id: string | null
+  project_ids: string[]
   created_at: string
-  profiles: {
-    id: string
-    full_name: string | null
-    email: string
-    role: string
-  }
+  updated_at: string
 }
 
-export async function getProjectMembers(projectId: string): Promise<{ error: string | null, data: Member[] | null }> {
+export async function getProjectMembers(projectId: string): Promise<{ error: string | null, data: User[] | null }> {
   const supabase = await createClient()
   
+  // Get project to get user_ids
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: project } = await (supabase as any)
+    .from('projects')
+    .select('user_ids')
+    .eq('id', projectId)
+    .single()
+
+  if (!project || !project.user_ids || project.user_ids.length === 0) {
+    return { error: null, data: [] }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
-    .from('project_members')
-    .select('*, profiles(id, full_name, email, role)')
-    .eq('project_id', projectId)
+    .from('users')
+    .select('*')
+    .in('user_id', project.user_ids)
 
   if (error) {
     return { error: error.message, data: null }
   }
 
-  return { error: null, data: data as Member[] }
+  return { error: null, data: data as User[] }
 }
 
-export async function getAvailableUsers(projectId: string): Promise<{ error: string | null, data: { id: string, full_name: string | null, email: string, role: string }[] | null }> {
+export async function getAvailableUsers(projectId: string): Promise<{ error: string | null, data: User[] | null }> {
   const supabase = await createClient()
   
   // Get current project members
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: currentMembers } = await (supabase as any)
-    .from('project_members')
-    .select('user_id')
-    .eq('project_id', projectId)
+  const { data: project } = await (supabase as any)
+    .from('projects')
+    .select('user_ids')
+    .eq('id', projectId)
+    .single()
 
-  const memberIds = currentMembers?.map((m: { user_id: string }) => m.user_id) || []
+  const memberIds = project?.user_ids || []
 
-  // Get all profiles that are not already members
+  // Get all users that are not already members
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profiles, error } = await (supabase as any)
-    .from('profiles')
-    .select('id, full_name, email, role')
-    .not('id', 'in', `(${memberIds.length > 0 ? memberIds.join(',') : '00000000-0000-0000-0000-000000000000'})`)
+  let query = (supabase as any).from('users').select('*')
+  
+  if (memberIds.length > 0) {
+    query = query.not('user_id', 'in', `(${memberIds.join(',')})`)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     return { error: error.message, data: null }
   }
 
-  return { error: null, data: profiles }
+  return { error: null, data: data as User[] }
 }
 
 export async function addProjectMember(projectId: string, formData: FormData) {
@@ -68,60 +83,67 @@ export async function addProjectMember(projectId: string, formData: FormData) {
   }
 
   const userId = formData.get('user_id') as string
-  const role = formData.get('role') as string
 
-  if (!userId || !role) {
-    return { error: 'User ID and role are required' }
+  if (!userId) {
+    return { error: 'User ID is required' }
+  }
+
+  // Get current project
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: project } = await (supabase as any)
+    .from('projects')
+    .select('user_ids')
+    .eq('id', projectId)
+    .single()
+
+  if (!project) {
+    return { error: 'Project not found' }
   }
 
   // Check if user is already a member
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing } = await (supabase as any)
-    .from('project_members')
-    .select('id')
-    .eq('project_id', projectId)
-    .eq('user_id', userId)
-    .single()
-
-  if (existing) {
+  if (project.user_ids?.includes(userId)) {
     return { error: 'User is already a member of this project' }
   }
 
+  // Add user to project's user_ids
+  const newUserIds = [...(project.user_ids || []), userId]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
-    .from('project_members')
-    .insert([
-      {
-        project_id: projectId,
-        user_id: userId,
-        role: role,
-      },
-    ])
-    .select()
+  await (supabase as any)
+    .from('projects')
+    .update({ user_ids: newUserIds })
+    .eq('id', projectId)
+
+  // Add project to user's project_ids
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: targetUser } = await (supabase as any)
+    .from('users')
+    .select('project_ids')
+    .eq('user_id', userId)
     .single()
 
-  if (error) {
-    // Handle duplicate key error gracefully
-    if (error.code === '23505') {
-      return { error: 'User is already a member of this project' }
-    }
-    return { error: error.message }
+  if (targetUser) {
+    const newProjectIds = [...(targetUser.project_ids || []), projectId]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from('users')
+      .update({ project_ids: newProjectIds })
+      .eq('user_id', userId)
   }
 
   revalidatePath(`/projects/${projectId}`)
-  return { error: null, data }
+  return { error: null }
 }
 
-export async function updateMemberRole(memberId: string, projectId: string, formData: FormData) {
+export async function updateMemberRole(userId: string, projectId: string, formData: FormData) {
   const supabase = await createClient()
   
   const role = formData.get('role') as string
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
-    .from('project_members')
+    .from('users')
     .update({ role })
-    .eq('id', memberId)
+    .eq('user_id', userId)
 
   if (error) {
     return { error: error.message }
@@ -131,17 +153,44 @@ export async function updateMemberRole(memberId: string, projectId: string, form
   return { error: null }
 }
 
-export async function removeMember(memberId: string, projectId: string) {
+export async function removeMember(userId: string, projectId: string) {
   const supabase = await createClient()
   
+  // Get current project
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
-    .from('project_members')
-    .delete()
-    .eq('id', memberId)
+  const { data: project } = await (supabase as any)
+    .from('projects')
+    .select('user_ids')
+    .eq('id', projectId)
+    .single()
 
-  if (error) {
-    return { error: error.message }
+  if (!project) {
+    return { error: 'Project not found' }
+  }
+
+  // Remove user from project's user_ids
+  const newUserIds = (project.user_ids || []).filter((id: string) => id !== userId)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any)
+    .from('projects')
+    .update({ user_ids: newUserIds })
+    .eq('id', projectId)
+
+  // Remove project from user's project_ids
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: targetUser } = await (supabase as any)
+    .from('users')
+    .select('project_ids')
+    .eq('user_id', userId)
+    .single()
+
+  if (targetUser) {
+    const newProjectIds = (targetUser.project_ids || []).filter((id: string) => id !== projectId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from('users')
+      .update({ project_ids: newProjectIds })
+      .eq('user_id', userId)
   }
 
   revalidatePath(`/projects/${projectId}`)

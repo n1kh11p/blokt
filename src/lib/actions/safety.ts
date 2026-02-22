@@ -3,47 +3,36 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export interface SafetyAlert {
-  id: string
-  project_id: string
-  worker_id: string | null
-  video_upload_id: string | null
-  violation_type: string
+export interface Safety {
+  safety_id: string
   description: string | null
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  confidence_score: number | null
+  uri: string | null
+  task_id: string | null
+  user_id: string | null
   timestamp: string
-  acknowledged: boolean
-  acknowledged_by: string | null
-  acknowledged_at: string | null
+  safety_name: string | null
   created_at: string
-  worker?: { id: string; full_name: string | null; email: string }
-  video_upload?: { id: string; file_name: string }
-  project?: { id: string; name: string }
+  updated_at: string
 }
 
-export async function getProjectSafetyAlerts(projectId: string): Promise<{ error: string | null, data: SafetyAlert[] | null }> {
+export async function getSafetyEntries(taskId: string): Promise<{ error: string | null, data: Safety[] | null }> {
   const supabase = await createClient()
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
-    .from('safety_alerts')
-    .select(`
-      *,
-      worker:profiles!worker_id(id, full_name, email),
-      video_upload:video_uploads!video_upload_id(id, file_name)
-    `)
-    .eq('project_id', projectId)
+    .from('safety')
+    .select('*')
+    .eq('task_id', taskId)
     .order('timestamp', { ascending: false })
 
   if (error) {
     return { error: error.message, data: null }
   }
 
-  return { error: null, data: data as SafetyAlert[] }
+  return { error: null, data: data as Safety[] }
 }
 
-export async function getAllSafetyAlerts(): Promise<{ error: string | null, data: SafetyAlert[] | null }> {
+export async function getAllSafetyEntries(): Promise<{ error: string | null, data: Safety[] | null }> {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -51,37 +40,10 @@ export async function getAllSafetyAlerts(): Promise<{ error: string | null, data
     return { error: 'Not authenticated', data: null }
   }
 
-  // Get user's organization
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
-    .from('profiles')
-    .select('organization_id')
-    .eq('id', user.id)
-    .single()
-
-  // Get all projects for the user's organization
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: orgProjects } = await (supabase as any)
-    .from('projects')
-    .select('id')
-    .eq('organization_id', profile?.organization_id)
-
-  const projectIds = orgProjects?.map((p: { id: string }) => p.id) || []
-
-  if (projectIds.length === 0) {
-    return { error: null, data: [] }
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
-    .from('safety_alerts')
-    .select(`
-      *,
-      worker:profiles!worker_id(id, full_name, email),
-      video_upload:video_uploads!video_upload_id(id, file_name),
-      project:projects!project_id(id, name)
-    `)
-    .in('project_id', projectIds)
+    .from('safety')
+    .select('*')
     .order('timestamp', { ascending: false })
     .limit(100)
 
@@ -89,10 +51,10 @@ export async function getAllSafetyAlerts(): Promise<{ error: string | null, data
     return { error: error.message, data: null }
   }
 
-  return { error: null, data: data as SafetyAlert[] }
+  return { error: null, data: data as Safety[] }
 }
 
-export async function createSafetyAlert(formData: FormData) {
+export async function createSafetyEntry(formData: FormData) {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -100,29 +62,21 @@ export async function createSafetyAlert(formData: FormData) {
     return { error: 'Not authenticated' }
   }
 
-  const projectId = formData.get('project_id') as string
-  const workerId = formData.get('worker_id') as string
-  const videoUploadId = formData.get('video_upload_id') as string
-  const violationType = formData.get('violation_type') as string
+  const taskId = formData.get('task_id') as string
+  const userId = formData.get('user_id') as string
+  const safetyName = formData.get('safety_name') as string
   const description = formData.get('description') as string
-  const severity = formData.get('severity') as string
-  const confidenceScore = formData.get('confidence_score') as string
-
-  if (!projectId || !violationType || !severity) {
-    return { error: 'Project, violation type, and severity are required' }
-  }
+  const uri = formData.get('uri') as string
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
-    .from('safety_alerts')
+    .from('safety')
     .insert({
-      project_id: projectId,
-      worker_id: workerId || null,
-      video_upload_id: videoUploadId || null,
-      violation_type: violationType,
+      task_id: taskId || null,
+      user_id: userId || null,
+      safety_name: safetyName || null,
       description: description || null,
-      severity: severity,
-      confidence_score: confidenceScore ? parseFloat(confidenceScore) : null,
+      uri: uri || null,
     })
     .select()
     .single()
@@ -131,64 +85,66 @@ export async function createSafetyAlert(formData: FormData) {
     return { error: error.message }
   }
 
+  // If task_id provided, update the task's safety_id
+  if (taskId && data) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from('tasks')
+      .update({ safety_id: data.safety_id })
+      .eq('id', taskId)
+  }
+
   revalidatePath('/safety')
-  revalidatePath(`/projects/${projectId}`)
   return { error: null, data }
 }
 
-export async function acknowledgeSafetyAlert(alertId: string, projectId: string) {
+export async function updateSafetyEntry(safetyId: string, formData: FormData) {
   const supabase = await createClient()
   
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
+  const safetyData = {
+    safety_name: formData.get('safety_name') as string || null,
+    description: formData.get('description') as string || null,
+    uri: formData.get('uri') as string || null,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
-    .from('safety_alerts')
-    .update({
-      acknowledged: true,
-      acknowledged_by: user.id,
-      acknowledged_at: new Date().toISOString(),
-    })
-    .eq('id', alertId)
+    .from('safety')
+    .update(safetyData)
+    .eq('safety_id', safetyId)
 
   if (error) {
     return { error: error.message }
   }
 
   revalidatePath('/safety')
-  revalidatePath(`/projects/${projectId}`)
   return { error: null }
 }
 
-export async function deleteSafetyAlert(alertId: string, projectId: string) {
+export async function deleteSafetyEntry(safetyId: string) {
   const supabase = await createClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
-    .from('safety_alerts')
+    .from('safety')
     .delete()
-    .eq('id', alertId)
+    .eq('safety_id', safetyId)
 
   if (error) {
     return { error: error.message }
   }
 
   revalidatePath('/safety')
-  revalidatePath(`/projects/${projectId}`)
   return { error: null }
 }
 
-export async function getUnacknowledgedAlertsCount(): Promise<number> {
+export async function getSafetyCount(): Promise<number> {
   const supabase = await createClient()
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { count } = await (supabase as any)
-    .from('safety_alerts')
+    .from('safety')
     .select('*', { count: 'exact', head: true })
-    .eq('acknowledged', false)
 
   return count || 0
 }
