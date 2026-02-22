@@ -152,14 +152,7 @@ export async function getDashboardData(): Promise<ApiResponse<DashboardData>> {
       .contains('user_ids', [user.id])
       .order('created_at', { ascending: false })
 
-    let projects = (projectsData || []) as Project[]
-    
-    // If no projects, use mock data
-    if (projects.length === 0) {
-      console.log('[Dashboard] No projects found, using mock data')
-      projects = generateMockProjects(3)
-    }
-
+    const projects = (projectsData || []) as Project[]
     const activeProjects = projects.filter(p => p.status === 'active' || p.status === 'on_hold')
 
     // Fetch tasks for all projects
@@ -175,12 +168,6 @@ export async function getDashboardData(): Promise<ApiResponse<DashboardData>> {
       
       allTasks = (tasksData || []) as Task[]
     }
-    
-    // If no tasks found, use mock data
-    if (allTasks.length === 0) {
-      console.log('[Dashboard] No tasks found, using mock data')
-      allTasks = generateMockTasks(15)
-    }
 
     // Filter tasks by status
     const completedTasks = allTasks.filter(t => t.status === 'completed')
@@ -191,7 +178,7 @@ export async function getDashboardData(): Promise<ApiResponse<DashboardData>> {
     projects.forEach(p => {
       (p.user_ids || []).forEach(uid => uniqueUserIds.add(uid))
     })
-    const totalMembers = uniqueUserIds.size || 8 // Default to 8 if no members
+    const totalMembers = uniqueUserIds.size
 
     const dashboardData: DashboardData = {
       firstName,
