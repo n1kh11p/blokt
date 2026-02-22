@@ -6,13 +6,14 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ url }: VideoPlayerProps) {
   return (
-    <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+    <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
       <video
-        src={url}
         controls
-        className="w-full h-full"
+        className="w-full h-full max-h-[70vh] object-contain bg-black"
         preload="metadata"
+        playsInline
       >
+        <source src={url} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>

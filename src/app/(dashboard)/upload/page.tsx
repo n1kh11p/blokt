@@ -108,10 +108,12 @@ export default function UploadPage() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('userId', user.id)
 
       const response = await fetch('/api/upload', {
         method: 'POST',
+        headers: {
+          'x-user-id': user.id,
+        },
         body: formData,
       })
 
@@ -145,7 +147,7 @@ export default function UploadPage() {
       setIsProcessingAI(true)
 
       // Call AI action to read json and update tasks
-      const aiResult = await processVideoAnnotations(result.videoId, selectedTasks)
+      const aiResult = await processVideoAnnotations(result.videoId)
 
       setIsUploading(false)
       setIsProcessingAI(false)
