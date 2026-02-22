@@ -298,7 +298,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   <p className="mt-2 text-sm text-stone-500">
                     Upload bodycam footage to get started
                   </p>
-                  <Link href="/upload" className="mt-4">
+                  <Link href="/videos" className="mt-4">
                     <Button className="bg-amber-500 hover:bg-amber-600">
                       Upload Video
                     </Button>

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
   FolderKanban,
-  Upload,
+  Video,
   PlaySquare,
   BarChart3,
   Settings,
@@ -35,10 +35,9 @@ const navItems: NavItem[] = [
     icon: FolderKanban,
   },
   {
-    title: 'Upload',
-    href: '/upload',
-    icon: Upload,
-    roles: ['field_worker', 'foreman'],
+    title: 'Videos',
+    href: '/videos',
+    icon: Video,
   },
   {
     title: 'Review',

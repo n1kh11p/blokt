@@ -70,21 +70,46 @@ export async function addProjectMember(projectId: string, formData: FormData) {
   const userId = formData.get('user_id') as string
   const role = formData.get('role') as string
 
+  if (!userId || !role) {
+    return { error: 'User ID and role are required' }
+  }
+
+  // Check if user is already a member
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { data: existing } = await (supabase as any)
     .from('project_members')
-    .insert({
-      project_id: projectId,
-      user_id: userId,
-      role: role,
-    })
+    .select('id')
+    .eq('project_id', projectId)
+    .eq('user_id', userId)
+    .single()
+
+  if (existing) {
+    return { error: 'User is already a member of this project' }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('project_members')
+    .insert([
+      {
+        project_id: projectId,
+        user_id: userId,
+        role: role,
+      },
+    ])
+    .select()
+    .single()
 
   if (error) {
+    // Handle duplicate key error gracefully
+    if (error.code === '23505') {
+      return { error: 'User is already a member of this project' }
+    }
     return { error: error.message }
   }
 
   revalidatePath(`/projects/${projectId}`)
-  return { error: null }
+  return { error: null, data }
 }
 
 export async function updateMemberRole(memberId: string, projectId: string, formData: FormData) {
