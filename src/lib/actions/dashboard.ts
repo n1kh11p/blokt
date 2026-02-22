@@ -8,8 +8,6 @@ import type { DashboardData } from '@/types/dashboard'
 // TYPES
 // ============================================
 
-export type { DashboardData }
-
 interface ApiResponse<T> {
   error: string | null
   data: T | null
