@@ -174,88 +174,108 @@ ALTER TABLE observed_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE safety_alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_summaries ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
+-- RLS Policies - Allow all authenticated users full access
 
--- Profiles: Users can read all profiles, update their own
-CREATE POLICY "Profiles are viewable by authenticated users" ON profiles
+-- Profiles
+CREATE POLICY "Authenticated users can view profiles" ON profiles
   FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY "Users can update their own profile" ON profiles
-  FOR UPDATE TO authenticated USING (auth.uid() = id);
+CREATE POLICY "Authenticated users can update profiles" ON profiles
+  FOR UPDATE TO authenticated USING (true);
 
-CREATE POLICY "Users can insert their own profile" ON profiles
-  FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
+CREATE POLICY "Authenticated users can insert profiles" ON profiles
+  FOR INSERT TO authenticated WITH CHECK (true);
 
--- Projects: Members can view their projects
-CREATE POLICY "Project members can view projects" ON projects
-  FOR SELECT TO authenticated
-  USING (
-    id IN (
-      SELECT project_id FROM project_members WHERE user_id = auth.uid()
-    )
-    OR
-    organization_id IN (
-      SELECT organization_id FROM profiles WHERE id = auth.uid()
-    )
-  );
+-- Projects
+CREATE POLICY "Authenticated users can view projects" ON projects
+  FOR SELECT TO authenticated USING (true);
 
--- Project members: Can view membership of projects they're in
-CREATE POLICY "Can view project memberships" ON project_members
-  FOR SELECT TO authenticated
-  USING (
-    project_id IN (
-      SELECT project_id FROM project_members WHERE user_id = auth.uid()
-    )
-  );
+CREATE POLICY "Authenticated users can create projects" ON projects
+  FOR INSERT TO authenticated WITH CHECK (true);
 
--- Planned tasks: Project members can view
-CREATE POLICY "Project members can view tasks" ON planned_tasks
-  FOR SELECT TO authenticated
-  USING (
-    project_id IN (
-      SELECT project_id FROM project_members WHERE user_id = auth.uid()
-    )
-  );
+CREATE POLICY "Authenticated users can update projects" ON projects
+  FOR UPDATE TO authenticated USING (true);
 
--- Video uploads: Workers can upload, project members can view
-CREATE POLICY "Project members can view uploads" ON video_uploads
-  FOR SELECT TO authenticated
-  USING (
-    project_id IN (
-      SELECT project_id FROM project_members WHERE user_id = auth.uid()
-    )
-  );
+CREATE POLICY "Authenticated users can delete projects" ON projects
+  FOR DELETE TO authenticated USING (true);
 
-CREATE POLICY "Workers can upload videos" ON video_uploads
-  FOR INSERT TO authenticated
-  WITH CHECK (worker_id = auth.uid());
+-- Project members
+CREATE POLICY "Authenticated users can view project members" ON project_members
+  FOR SELECT TO authenticated USING (true);
 
--- Observed events: Project members can view
-CREATE POLICY "Project members can view events" ON observed_events
-  FOR SELECT TO authenticated
-  USING (
-    project_id IN (
-      SELECT project_id FROM project_members WHERE user_id = auth.uid()
-    )
-  );
+CREATE POLICY "Authenticated users can insert project members" ON project_members
+  FOR INSERT TO authenticated WITH CHECK (true);
 
--- Safety alerts: Project members can view
-CREATE POLICY "Project members can view safety alerts" ON safety_alerts
-  FOR SELECT TO authenticated
-  USING (
-    project_id IN (
-      SELECT project_id FROM project_members WHERE user_id = auth.uid()
-    )
-  );
+CREATE POLICY "Authenticated users can update project members" ON project_members
+  FOR UPDATE TO authenticated USING (true);
 
--- Daily summaries: Project members can view
-CREATE POLICY "Project members can view daily summaries" ON daily_summaries
-  FOR SELECT TO authenticated
-  USING (
-    project_id IN (
-      SELECT project_id FROM project_members WHERE user_id = auth.uid()
-    )
-  );
+CREATE POLICY "Authenticated users can delete project members" ON project_members
+  FOR DELETE TO authenticated USING (true);
+
+-- Planned tasks
+CREATE POLICY "Authenticated users can view tasks" ON planned_tasks
+  FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can insert tasks" ON planned_tasks
+  FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update tasks" ON planned_tasks
+  FOR UPDATE TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can delete tasks" ON planned_tasks
+  FOR DELETE TO authenticated USING (true);
+
+-- Video uploads
+CREATE POLICY "Authenticated users can view uploads" ON video_uploads
+  FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can insert uploads" ON video_uploads
+  FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update uploads" ON video_uploads
+  FOR UPDATE TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can delete uploads" ON video_uploads
+  FOR DELETE TO authenticated USING (true);
+
+-- Observed events
+CREATE POLICY "Authenticated users can view events" ON observed_events
+  FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can insert events" ON observed_events
+  FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update events" ON observed_events
+  FOR UPDATE TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can delete events" ON observed_events
+  FOR DELETE TO authenticated USING (true);
+
+-- Safety alerts
+CREATE POLICY "Authenticated users can view safety alerts" ON safety_alerts
+  FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can insert safety alerts" ON safety_alerts
+  FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update safety alerts" ON safety_alerts
+  FOR UPDATE TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can delete safety alerts" ON safety_alerts
+  FOR DELETE TO authenticated USING (true);
+
+-- Daily summaries
+CREATE POLICY "Authenticated users can view daily summaries" ON daily_summaries
+  FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can insert daily summaries" ON daily_summaries
+  FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update daily summaries" ON daily_summaries
+  FOR UPDATE TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can delete daily summaries" ON daily_summaries
+  FOR DELETE TO authenticated USING (true);
 
 -- Function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()

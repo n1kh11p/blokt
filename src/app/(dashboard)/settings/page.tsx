@@ -1,26 +1,17 @@
-import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { Profile } from '@/types/database'
+import { getProfile } from '@/lib/actions/profile'
+import { ProfileForm, PasswordForm } from '@/components/settings/profile-form'
+import { redirect } from 'next/navigation'
 
 export default async function SettingsPage() {
-  const supabase = await createClient()
+  const { data: profile, error } = await getProfile()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user?.id || '')
-    .single()
-
-  const typedProfile = profile as Profile | null
+  if (error || !profile) {
+    redirect('/login')
+  }
 
   return (
     <div className="space-y-6">
@@ -31,6 +22,17 @@ export default async function SettingsPage() {
         </p>
       </div>
 
+      {profile.organizations && (
+        <Card className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+          <CardContent className="py-4">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              <strong>Organization:</strong> {profile.organizations.name}
+              {profile.organizations.type && ` (${profile.organizations.type})`}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
@@ -39,86 +41,8 @@ export default async function SettingsPage() {
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>
-                Update your personal details and contact information
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    defaultValue={typedProfile?.full_name || ''}
-                    placeholder="John Smith"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    defaultValue={typedProfile?.email || ''}
-                    disabled
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    defaultValue={typedProfile?.phone || ''}
-                    placeholder="+1 (555) 000-0000"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="trade">Trade</Label>
-                  <Input
-                    id="trade"
-                    defaultValue={typedProfile?.trade || ''}
-                    placeholder="Electrician"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <Button className="bg-amber-500 hover:bg-amber-600">
-                  Save Changes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Password</CardTitle>
-              <CardDescription>
-                Update your password to keep your account secure
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input id="currentPassword" type="password" />
-                </div>
-                <div></div>
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input id="newPassword" type="password" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input id="confirmPassword" type="password" />
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <Button variant="outline">Update Password</Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ProfileForm profile={profile} />
+          <PasswordForm />
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">

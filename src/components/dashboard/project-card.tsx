@@ -10,10 +10,10 @@ interface ProjectCardProps {
   name: string
   location: string | null
   status: string
-  alignmentScore: number | null
+  alignmentScore?: number | null
   tasksCompleted: number
   totalTasks: number
-  safetyAlerts: number
+  safetyAlerts?: number
 }
 
 const statusColors: Record<string, string> = {
@@ -73,7 +73,7 @@ export function ProjectCard({
                 Alignment: {alignmentScore !== null ? `${alignmentScore}%` : 'N/A'}
               </span>
             </div>
-            {safetyAlerts > 0 && (
+            {safetyAlerts && safetyAlerts > 0 && (
               <div className="flex items-center gap-1 text-amber-600">
                 <AlertTriangle className="h-4 w-4" />
                 <span className="text-sm font-medium">{safetyAlerts}</span>
