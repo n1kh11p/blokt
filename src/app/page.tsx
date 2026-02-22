@@ -41,7 +41,7 @@ export default function Home() {
                 <span className="text-primary">for Construction</span>
               </h1>
               <p className="mt-6 text-xl text-white/60 max-w-2xl mx-auto">
-                The modern project management platform built specifically for construction teams. 
+                The modern project management platform built specifically for construction teams.
                 Track progress, manage tasks, and deliver projects on time.
               </p>
               <div className="mt-10 flex items-center justify-center gap-4">
@@ -61,20 +61,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Product Screenshot */}
-            <div className="mt-20 relative">
-              <div className="absolute -inset-4 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none" />
-              <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl shadow-primary/20">
-                <Image
-                  src="/dashboard-preview.png"
-                  alt="Blokt Dashboard"
-                  width={1400}
-                  height={900}
-                  className="w-full"
-                  priority
-                />
-              </div>
-            </div>
           </div>
         </section>
 
