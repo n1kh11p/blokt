@@ -137,20 +137,38 @@ ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 -- RLS Policies for organizations
 CREATE POLICY "Users can view their organization"
   ON organizations FOR SELECT
-  USING (id IN (SELECT organization_id FROM users WHERE user_id = auth.uid()));
+  USING (
+    id IN (SELECT organization_id FROM users WHERE user_id = auth.uid()) OR
+    user_ids @> ARRAY[auth.uid()]
+  );
 
 CREATE POLICY "Users can update their organization"
   ON organizations FOR UPDATE
-  USING (id IN (SELECT organization_id FROM users WHERE user_id = auth.uid()));
+  USING (
+    id IN (SELECT organization_id FROM users WHERE user_id = auth.uid()) OR
+    user_ids @> ARRAY[auth.uid()]
+  );
 
 CREATE POLICY "Users can insert organizations"
   ON organizations FOR INSERT
   WITH CHECK (true);
 
 -- RLS Policies for users
-CREATE POLICY "Users can view users in their organization"
+CREATE POLICY "Users can view their own record"
   ON users FOR SELECT
-  USING (organization_id IN (SELECT organization_id FROM users WHERE user_id = auth.uid()));
+  USING (user_id = auth.uid());
+
+CREATE OR REPLACE FUNCTION public.get_current_user_org()
+RETURNS UUID AS $$
+  SELECT organization_id FROM public.users WHERE user_id = auth.uid() LIMIT 1;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+CREATE POLICY "Users can view organization members"
+  ON users FOR SELECT
+  USING (
+    organization_id IS NOT NULL AND 
+    organization_id = public.get_current_user_org()
+  );
 
 CREATE POLICY "Users can update their own profile"
   ON users FOR UPDATE
