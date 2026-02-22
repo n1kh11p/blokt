@@ -28,6 +28,10 @@ export default async function DashboardPage() {
     .single()
 
   const typedProfile = userRecord as User | null
+  console.log('[Dashboard] User record from DB:', userRecord)
+  console.log('[Dashboard] Typed profile:', typedProfile)
+  console.log('[Dashboard] Role from profile:', typedProfile?.role)
+  
   const role: UserRole = typedProfile?.role || 'field_worker'
 
   // Fetch dashboard data using clean API endpoint
@@ -43,6 +47,8 @@ export default async function DashboardPage() {
       </div>
     )
   }
+
+  console.log('[Dashboard] Final role being used:', role)
 
   switch (role) {
     case 'field_worker':
