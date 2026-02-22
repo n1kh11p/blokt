@@ -1,14 +1,20 @@
 -- Schema Overhaul: Simplified database structur
 -- This migration drops old tables and creates the new simplified schema
 
--- Drop existing tables (in order to handle foreign key constraints)
+-- Drop old deprecated tables
 DROP TABLE IF EXISTS daily_summaries CASCADE;
 DROP TABLE IF EXISTS safety_alerts CASCADE;
 DROP TABLE IF EXISTS video_uploads CASCADE;
 DROP TABLE IF EXISTS planned_tasks CASCADE;
 DROP TABLE IF EXISTS project_members CASCADE;
-DROP TABLE IF EXISTS projects CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
+
+-- Drop new schema tables if they exist (for idempotency)
+DROP TABLE IF EXISTS videos CASCADE;
+DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS safety CASCADE;
+DROP TABLE IF EXISTS projects CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS organizations CASCADE;
 
 -- ============================================
