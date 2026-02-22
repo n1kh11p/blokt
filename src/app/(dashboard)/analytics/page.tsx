@@ -2,41 +2,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TrendingUp, TrendingDown, Target, Shield, Clock, Users } from 'lucide-react'
+import { getAnalyticsData } from '@/lib/actions/analytics'
 
-const mockAlignmentData = [
-  { date: 'Mon', planned: 24, completed: 22, score: 92 },
-  { date: 'Tue', planned: 28, completed: 25, score: 89 },
-  { date: 'Wed', planned: 22, completed: 20, score: 91 },
-  { date: 'Thu', planned: 30, completed: 24, score: 80 },
-  { date: 'Fri', planned: 26, completed: 25, score: 96 },
-]
+export default async function AnalyticsPage() {
+  const { data: analytics, error } = await getAnalyticsData()
 
-const mockProjects = [
-  { name: 'Airport Terminal B', alignment: 87, efficiency: 94, safety: 98 },
-  { name: 'Downtown Office Complex', alignment: 92, efficiency: 88, safety: 100 },
-  { name: 'Riverside Condominiums', alignment: 74, efficiency: 82, safety: 95 },
-  { name: 'Highway 101 Expansion', alignment: 91, efficiency: 96, safety: 97 },
-]
-
-const mockTradePerformance = [
-  { trade: 'Concrete', tasksCompleted: 45, avgDuration: 4.2, onTimeRate: 94 },
-  { trade: 'Electrical', tasksCompleted: 38, avgDuration: 3.8, onTimeRate: 91 },
-  { trade: 'Steel', tasksCompleted: 32, avgDuration: 6.5, onTimeRate: 88 },
-  { trade: 'Plumbing', tasksCompleted: 28, avgDuration: 3.2, onTimeRate: 96 },
-  { trade: 'HVAC', tasksCompleted: 22, avgDuration: 5.1, onTimeRate: 85 },
-]
-
-const mockWeeklyTrends = [
-  { week: 'Week 1', completion: 78, delays: 12, productivity: 82 },
-  { week: 'Week 2', completion: 82, delays: 9, productivity: 85 },
-  { week: 'Week 3', completion: 85, delays: 7, productivity: 88 },
-  { week: 'Week 4', completion: 89, delays: 5, productivity: 91 },
-]
-
-export default function AnalyticsPage() {
-  const avgAlignment = Math.round(
-    mockAlignmentData.reduce((acc, d) => acc + d.score, 0) / mockAlignmentData.length
-  )
+  if (error || !analytics) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-foreground">Unable to load analytics</h2>
+          <p className="text-muted-foreground mt-2">{error || 'Unknown error'}</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -80,9 +60,9 @@ export default function AnalyticsPage() {
             <Target className="h-4 w-4 text-stone-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{avgAlignment}%</div>
+            <div className="text-2xl font-bold">{analytics.avgAlignment}%</div>
             <p className="text-xs text-green-600 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" /> +4% from last week
+              <TrendingUp className="h-3 w-3" /> {analytics.alignmentTrend} from last week
             </p>
           </CardContent>
         </Card>
@@ -92,9 +72,9 @@ export default function AnalyticsPage() {
             <Clock className="h-4 w-4 text-stone-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">88%</div>
+            <div className="text-2xl font-bold">{analytics.efficiencyScore}%</div>
             <p className="text-xs text-green-600 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" /> +2% from last week
+              <TrendingUp className="h-3 w-3" /> {analytics.efficiencyTrend} from last week
             </p>
           </CardContent>
         </Card>
@@ -104,9 +84,9 @@ export default function AnalyticsPage() {
             <Shield className="h-4 w-4 text-stone-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">97%</div>
+            <div className="text-2xl font-bold">{analytics.safetyCompliance}%</div>
             <p className="text-xs text-red-600 flex items-center gap-1">
-              <TrendingDown className="h-3 w-3" /> -1% from last week
+              <TrendingDown className="h-3 w-3" /> {analytics.safetyTrend} from last week
             </p>
           </CardContent>
         </Card>
@@ -116,8 +96,8 @@ export default function AnalyticsPage() {
             <Users className="h-4 w-4 text-stone-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">48</div>
-            <p className="text-xs text-stone-500">across 8 projects</p>
+            <div className="text-2xl font-bold">{analytics.activeWorkers}</div>
+            <p className="text-xs text-stone-500">across {analytics.projectCount} projects</p>
           </CardContent>
         </Card>
       </div>
@@ -139,7 +119,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="h-[300px] flex items-end justify-between gap-2 pt-4">
-                {mockAlignmentData.map((day) => (
+                {analytics.alignmentData.map((day) => (
                   <div key={day.date} className="flex-1 flex flex-col items-center gap-2">
                     <div className="w-full flex gap-1 h-[200px] items-end">
                       <div
@@ -178,7 +158,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockProjects.map((project) => (
+                {analytics.projectMetrics.map((project) => (
                   <div key={project.name} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-stone-900 dark:text-white">
@@ -210,7 +190,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockTradePerformance.map((item) => (
+                  {analytics.tradePerformance.map((item) => (
                     <div key={item.trade} className="flex items-center justify-between rounded-lg border border-stone-200 p-3 dark:border-stone-800">
                       <div>
                         <p className="font-medium text-stone-900 dark:text-white">{item.trade}</p>
@@ -234,7 +214,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockWeeklyTrends.map((week) => (
+                  {analytics.weeklyTrends.map((week) => (
                     <div key={week.week} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-stone-900 dark:text-white">{week.week}</span>
@@ -271,13 +251,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {[
-                  { task: 'Electrical Work', observed: 4.2, expected: 4.5, efficiency: 107 },
-                  { task: 'Concrete Pour', observed: 6.8, expected: 6.0, efficiency: 88 },
-                  { task: 'Steel Framing', observed: 8.2, expected: 8.0, efficiency: 98 },
-                  { task: 'HVAC Installation', observed: 5.5, expected: 5.0, efficiency: 91 },
-                  { task: 'Plumbing', observed: 3.8, expected: 4.0, efficiency: 105 },
-                ].map((item) => (
+                {analytics.taskDurationAnalysis.map((item) => (
                   <div key={item.task} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-stone-900 dark:text-white">{item.task}</span>
@@ -315,13 +289,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[
-                  { type: 'Missing Hard Hat', count: 3, severity: 'high' },
-                  { type: 'Improper Fall Protection', count: 2, severity: 'critical' },
-                  { type: 'Unsafe Ladder Usage', count: 4, severity: 'medium' },
-                  { type: 'Missing Safety Vest', count: 6, severity: 'low' },
-                  { type: 'PPE Non-Compliance', count: 2, severity: 'medium' },
-                ].map((item) => (
+                {analytics.safetyViolations.map((item) => (
                   <div
                     key={item.type}
                     className="flex items-center justify-between rounded-lg border border-stone-200 p-4 dark:border-stone-800"
