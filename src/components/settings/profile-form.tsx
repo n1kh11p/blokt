@@ -28,7 +28,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
     if (result.error) {
       setMessage({ type: 'error', text: result.error })
-    } else {
+    } else if (result.success) {
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
       router.refresh()
     }
@@ -123,7 +123,7 @@ export function PasswordForm() {
 
     if (result.error) {
       setMessage({ type: 'error', text: result.error })
-    } else {
+    } else if (result.success) {
       setMessage({ type: 'success', text: 'Password updated successfully!' })
       e.currentTarget.reset()
     }

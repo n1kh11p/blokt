@@ -16,34 +16,6 @@ interface ProcoreProject {
   updated_at: string
 }
 
-interface ProcoreRFI {
-  id: number
-  number: string
-  subject: string
-  status: string
-  rfi_manager: { id: number; name: string }
-  ball_in_court: { id: number; name: string }
-  due_date: string
-  attachments: { id: number; url: string }[]
-}
-
-interface ProcoreUser {
-  id: number
-  name: string
-  email: string
-  job_title: string
-  is_employee: boolean
-  vendor: { id: number; name: string } | null
-}
-
-interface ProcoreManpowerLog {
-  id: number
-  date: string
-  num_workers: number
-  num_hours: number
-  vendor: { id: number; name: string }
-  notes: string
-}
 
 // Mock data generators following Procore schemas
 function generateMockProjects(): ProcoreProject[] {
@@ -106,162 +78,6 @@ function generateMockProjects(): ProcoreProject[] {
   ]
 }
 
-function generateMockRFIs(projectId: number): ProcoreRFI[] {
-  const rfis: ProcoreRFI[] = [
-    {
-      id: 1001,
-      number: "RFI-001",
-      subject: "Foundation Rebar Conflict with MEP",
-      status: "Open",
-      rfi_manager: { id: 1, name: "Sarah Johnson" },
-      ball_in_court: { id: 2, name: "Mike Chen" },
-      due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      attachments: [{ id: 101, url: "https://example.com/attachment1.pdf" }]
-    },
-    {
-      id: 1002,
-      number: "RFI-002",
-      subject: "Structural Steel Connection Detail",
-      status: "Open",
-      rfi_manager: { id: 1, name: "Sarah Johnson" },
-      ball_in_court: { id: 3, name: "David Lee" },
-      due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      attachments: []
-    },
-    {
-      id: 1003,
-      number: "RFI-003",
-      subject: "HVAC Duct Routing Clarification",
-      status: "Closed",
-      rfi_manager: { id: 2, name: "Mike Chen" },
-      ball_in_court: { id: 1, name: "Sarah Johnson" },
-      due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      attachments: [{ id: 102, url: "https://example.com/hvac-detail.pdf" }]
-    }
-  ]
-  return rfis.map(rfi => ({ ...rfi, id: rfi.id + projectId }))
-}
-
-function generateMockUsers(projectId: number): ProcoreUser[] {
-  const users: ProcoreUser[] = [
-    {
-      id: 2001,
-      name: "Sarah Johnson",
-      email: "sarah.johnson@buildco.com",
-      job_title: "Project Manager",
-      is_employee: true,
-      vendor: null
-    },
-    {
-      id: 2002,
-      name: "Mike Chen",
-      email: "mike.chen@buildco.com",
-      job_title: "Site Superintendent",
-      is_employee: true,
-      vendor: null
-    },
-    {
-      id: 2003,
-      name: "David Lee",
-      email: "david.lee@structuraleng.com",
-      job_title: "Structural Engineer",
-      is_employee: false,
-      vendor: { id: 301, name: "Structural Engineering Associates" }
-    },
-    {
-      id: 2004,
-      name: "Maria Garcia",
-      email: "maria.garcia@electricpro.com",
-      job_title: "Electrical Foreman",
-      is_employee: false,
-      vendor: { id: 302, name: "ElectricPro Services" }
-    },
-    {
-      id: 2005,
-      name: "James Wilson",
-      email: "james.wilson@concreteco.com",
-      job_title: "Concrete Supervisor",
-      is_employee: false,
-      vendor: { id: 303, name: "Concrete Co." }
-    },
-    {
-      id: 2006,
-      name: "Emily Davis",
-      email: "emily.davis@buildco.com",
-      job_title: "Safety Manager",
-      is_employee: true,
-      vendor: null
-    },
-    {
-      id: 2007,
-      name: "Robert Martinez",
-      email: "robert.martinez@plumbingplus.com",
-      job_title: "Plumbing Lead",
-      is_employee: false,
-      vendor: { id: 304, name: "Plumbing Plus" }
-    },
-    {
-      id: 2008,
-      name: "Jennifer Brown",
-      email: "jennifer.brown@hvacexperts.com",
-      job_title: "HVAC Technician",
-      is_employee: false,
-      vendor: { id: 305, name: "HVAC Experts Inc." }
-    }
-  ]
-  return users.map(u => ({ ...u, id: u.id + projectId }))
-}
-
-function generateMockManpowerLogs(projectId: number): ProcoreManpowerLog[] {
-  const logs: ProcoreManpowerLog[] = []
-  const vendors = [
-    { id: 301, name: "Structural Engineering Associates" },
-    { id: 302, name: "ElectricPro Services" },
-    { id: 303, name: "Concrete Co." },
-    { id: 304, name: "Plumbing Plus" },
-    { id: 305, name: "HVAC Experts Inc." }
-  ]
-  
-  // Generate logs for the past 14 days
-  for (let i = 0; i < 14; i++) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    
-    // Skip weekends
-    if (date.getDay() === 0 || date.getDay() === 6) continue
-    
-    vendors.forEach((vendor, idx) => {
-      logs.push({
-        id: 3000 + projectId + i * 10 + idx,
-        date: date.toISOString().split('T')[0],
-        num_workers: Math.floor(Math.random() * 8) + 2,
-        num_hours: Math.floor(Math.random() * 40) + 20,
-        vendor: vendor,
-        notes: getRandomWorkNote()
-      })
-    })
-  }
-  
-  return logs
-}
-
-function getRandomWorkNote(): string {
-  const notes = [
-    "Completed foundation work in Section A",
-    "Installed electrical conduits on floors 3-5",
-    "Poured concrete for level 2 slab",
-    "HVAC ductwork installation in progress",
-    "Structural steel erection continuing",
-    "Plumbing rough-in for restrooms",
-    "Fire protection system installation",
-    "Exterior wall framing ongoing",
-    "Roof membrane application started",
-    "Interior partition framing",
-    "Elevator shaft construction",
-    "Stairwell concrete work"
-  ]
-  return notes[Math.floor(Math.random() * notes.length)]
-}
 
 interface MockTask {
   name: string
@@ -328,188 +144,116 @@ export async function connectProcore() {
     return { error: 'Not authenticated', success: false }
   }
 
-  // Get user's organization
+  // Get user's organization from users table
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
-    .from('profiles')
+  const { data: userRecord } = await (supabase as any)
+    .from('users')
     .select('organization_id')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
     .single()
 
-  if (!profile?.organization_id) {
-    return { error: 'No organization found', success: false }
+  if (!userRecord?.organization_id) {
+    return { error: 'No organization found. Please create an organization first.', success: false }
   }
 
-  const orgId = profile.organization_id
+  const orgId = userRecord.organization_id
 
   try {
-    // Simulate API calls with delays
     console.log('[Procore Mock] Starting integration...')
     
     // 1. Fetch Projects from Procore API
     console.log('[Procore Mock] GET https://api.procore.com/rest/v1.1/projects')
     const procoreProjects = generateMockProjects()
     
-    // Insert projects into database
+    // Get all users in the organization
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: orgUsers } = await (supabase as any)
+      .from('users')
+      .select('user_id, name, email, role')
+      .eq('organization_id', orgId)
+    
+    const availableUserIds = orgUsers?.map((u: { user_id: string }) => u.user_id) || [user.id]
+    
+    // Insert projects into database with user_ids
+    const insertedProjectIds: string[] = []
     for (const proj of procoreProjects) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: projectError } = await (supabase as any)
+      const { data: insertedProject, error: projectError } = await (supabase as any)
         .from('projects')
-        .upsert({
-          id: undefined, // Let DB generate
-          organization_id: orgId,
+        .insert({
           name: proj.name,
           location: `${proj.address}, ${proj.city}, ${proj.state_code}`,
           status: proj.active ? 'active' : 'completed',
-          start_date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-          end_date: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
-          procore_id: proj.id.toString(),
-        }, { onConflict: 'procore_id', ignoreDuplicates: true })
+          date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+          ended_date: proj.active ? null : new Date().toISOString(),
+          user_ids: availableUserIds,
+          task_ids: []
+        })
+        .select('id')
+        .single()
 
       if (projectError) {
         console.error('[Procore Mock] Project insert error:', projectError)
+      } else if (insertedProject) {
+        insertedProjectIds.push(insertedProject.id)
       }
     }
 
-    // Get inserted projects to use their IDs
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: dbProjects } = await (supabase as any)
-      .from('projects')
-      .select('id, procore_id')
-      .eq('organization_id', orgId)
-
-    const projectMap = new Map(dbProjects?.map((p: { id: string; procore_id: string }) => [p.procore_id, p.id]) || [])
-
-    // 2. Fetch Users/Directory from Procore API for each project
-    console.log('[Procore Mock] GET https://api.procore.com/rest/v1.0/projects/{project_id}/users')
-    
-    // Get all existing profiles in the organization to add as project members
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: orgProfiles } = await (supabase as any)
-      .from('profiles')
-      .select('id, full_name, email, role')
-      .eq('organization_id', orgId)
-    
-    const availableUsers = orgProfiles || []
-    let totalMembers = 0
-    
-    for (const proj of procoreProjects) {
-      const dbProjectId = projectMap.get(proj.id.toString())
-      if (!dbProjectId) continue
-
-      // Add current user as project manager
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase as any)
-        .from('project_members')
-        .upsert({
-          project_id: dbProjectId,
-          user_id: user.id,
-          role: 'project_manager'
-        }, { onConflict: 'project_id,user_id', ignoreDuplicates: true })
-      totalMembers++
-
-      // Add other org members to the project with various roles
-      const roles: Array<'foreman' | 'field_worker' | 'safety_manager'> = ['foreman', 'field_worker', 'safety_manager']
-      for (const orgUser of availableUsers) {
-        if (orgUser.id === user.id) continue // Skip current user, already added
-        
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
-          .from('project_members')
-          .upsert({
-            project_id: dbProjectId,
-            user_id: orgUser.id,
-            role: roles[totalMembers % roles.length]
-          }, { onConflict: 'project_id,user_id', ignoreDuplicates: true })
-        totalMembers++
-      }
-    }
-
-    // 3. Fetch RFIs from Procore API - Store as tasks
+    // 2. Create tasks for each project
     console.log('[Procore Mock] GET https://api.procore.com/rest/v1.0/projects/{project_id}/rfis')
     let totalTasks = 0
-    for (const proj of procoreProjects) {
-      const procoreRFIs = generateMockRFIs(proj.id)
-      const dbProjectId = projectMap.get(proj.id.toString())
-      
-      if (!dbProjectId) continue
-
-      // Add RFIs as tasks
-      for (const rfi of procoreRFIs) {
-        const rfiDueDate = new Date(rfi.due_date)
-        const rfiStartDate = new Date(rfiDueDate)
-        rfiStartDate.setDate(rfiStartDate.getDate() - 7) // RFIs typically have a week window
-        
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
-          .from('planned_tasks')
-          .upsert({
-            project_id: dbProjectId,
-            name: `[RFI-${rfi.number}] ${rfi.subject}`,
-            description: `Procore RFI: ${rfi.subject}\nManager: ${rfi.rfi_manager.name}\nBall in Court: ${rfi.ball_in_court.name}`,
-            status: rfi.status === 'Closed' ? 'completed' : 'pending',
-            planned_start: rfiStartDate.toISOString().split('T')[0],
-            planned_end: rfi.due_date,
-            procore_rfi_id: rfi.id.toString(),
-          }, { onConflict: 'procore_rfi_id', ignoreDuplicates: true })
-        totalTasks++
-      }
-
-      // Add regular construction tasks (derived from manpower/schedule data)
+    
+    for (const projectId of insertedProjectIds) {
       const mockTasks = generateMockTasks()
+      const taskIds: string[] = []
+      
       for (const task of mockTasks) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
-          .from('planned_tasks')
+        const { data: insertedTask } = await (supabase as any)
+          .from('tasks')
           .insert({
-            project_id: dbProjectId,
             name: task.name,
             description: task.description,
             status: task.status,
-            planned_start: task.planned_start,
-            planned_end: task.planned_end,
+            start: task.planned_start,
+            end: task.planned_end,
+            assignees: availableUserIds.slice(0, 2),
+            trade: ['Electrical', 'Plumbing', 'HVAC', 'Concrete', 'Steel'][Math.floor(Math.random() * 5)]
           })
-        totalTasks++
+          .select('id')
+          .single()
+        
+        if (insertedTask) {
+          taskIds.push(insertedTask.id)
+          totalTasks++
+        }
       }
+      
+      // Update project with task_ids
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any)
+        .from('projects')
+        .update({ task_ids: taskIds })
+        .eq('id', projectId)
     }
 
-    // 4. Fetch Manpower Logs from Procore API - Store as daily summaries
-    console.log('[Procore Mock] GET https://api.procore.com/rest/v1.0/projects/{project_id}/manpower_logs')
-    for (const proj of procoreProjects) {
-      const manpowerLogs = generateMockManpowerLogs(proj.id)
-      const dbProjectId = projectMap.get(proj.id.toString())
+    // Update user's project_ids
+    for (const userId of availableUserIds) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: existingUser } = await (supabase as any)
+        .from('users')
+        .select('project_ids')
+        .eq('user_id', userId)
+        .single()
       
-      if (!dbProjectId) continue
-
-      // Aggregate logs by date
-      const dateAggregates: Record<string, { workers: number; hours: number; notes: string[] }> = {}
+      const currentProjectIds = existingUser?.project_ids || []
+      const updatedProjectIds = [...new Set([...currentProjectIds, ...insertedProjectIds])]
       
-      for (const log of manpowerLogs) {
-        if (!dateAggregates[log.date]) {
-          dateAggregates[log.date] = { workers: 0, hours: 0, notes: [] }
-        }
-        dateAggregates[log.date].workers += log.num_workers
-        dateAggregates[log.date].hours += log.num_hours
-        dateAggregates[log.date].notes.push(`${log.vendor.name}: ${log.notes}`)
-      }
-
-      for (const [date, data] of Object.entries(dateAggregates)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
-          .from('daily_summaries')
-          .upsert({
-            project_id: dbProjectId,
-            date: date,
-            total_labor_hours: data.hours,
-            tasks_planned: Math.floor(data.workers * 1.5),
-            tasks_completed: Math.floor(data.workers * 1.2),
-            alignment_score: 75 + Math.floor(Math.random() * 20),
-            efficiency_score: 80 + Math.floor(Math.random() * 15),
-            safety_compliance_rate: 90 + Math.floor(Math.random() * 10),
-            safety_incidents: Math.random() > 0.8 ? 1 : 0,
-            notes: data.notes.slice(0, 3).join('\n'),
-          }, { onConflict: 'project_id,date', ignoreDuplicates: true })
-      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any)
+        .from('users')
+        .update({ project_ids: updatedProjectIds })
+        .eq('user_id', userId)
     }
 
     console.log('[Procore Mock] Integration complete!')
@@ -523,9 +267,9 @@ export async function connectProcore() {
       success: true,
       summary: {
         projects: procoreProjects.length,
-        users: totalMembers,
+        users: availableUserIds.length,
         tasks: totalTasks,
-        manpowerLogs: procoreProjects.length * 50
+        manpowerLogs: 0
       }
     }
   } catch (err) {
@@ -542,20 +286,24 @@ export async function checkProcoreConnection(): Promise<{ connected: boolean; la
     return { connected: false }
   }
 
+  // Get user's organization from users table
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
-    .from('profiles')
+  const { data: userRecord } = await (supabase as any)
+    .from('users')
     .select('organization_id')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
     .single()
 
-  // Check if we have any projects with procore_id
+  if (!userRecord?.organization_id) {
+    return { connected: false }
+  }
+
+  // Check if we have any projects for this user
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: projects } = await (supabase as any)
     .from('projects')
     .select('updated_at')
-    .eq('organization_id', profile?.organization_id)
-    .not('procore_id', 'is', null)
+    .contains('user_ids', [user.id])
     .order('updated_at', { ascending: false })
     .limit(1)
 
