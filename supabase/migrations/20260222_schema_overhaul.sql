@@ -143,6 +143,10 @@ CREATE POLICY "Users can update their organization"
   ON organizations FOR UPDATE
   USING (id IN (SELECT organization_id FROM users WHERE user_id = auth.uid()));
 
+CREATE POLICY "Users can insert organizations"
+  ON organizations FOR INSERT
+  WITH CHECK (true);
+
 -- RLS Policies for users
 CREATE POLICY "Users can view users in their organization"
   ON users FOR SELECT

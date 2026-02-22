@@ -52,24 +52,8 @@ export default function RegisterPage() {
       return
     }
 
-    // Manually create user record in public.users table
-    // (in case trigger doesn't work)
-    if (data.user) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: userError } = await (supabase as any)
-        .from('users')
-        .insert({
-          user_id: data.user.id,
-          email: email,
-          name: fullName,
-          role: role,
-        })
-
-      if (userError) {
-        console.error('Error creating user record:', userError)
-        // Don't block registration if this fails - trigger might have worked
-      }
-    }
+    // The database trigger 'on_auth_user_created' automatically creates 
+    // the user record in public.users, so we don't need to do it here.
 
     router.push('/dashboard')
     router.refresh()
