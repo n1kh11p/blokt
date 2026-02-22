@@ -64,24 +64,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-20 border-t border-white/10">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { value: '500+', label: 'Projects Managed' },
-                { value: '50K+', label: 'Tasks Completed' },
-                { value: '98%', label: 'On-Time Delivery' },
-                { value: '2.5x', label: 'Productivity Boost' },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <p className="text-4xl font-bold text-primary">{stat.value}</p>
-                  <p className="mt-2 text-sm text-white/60">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Features Section */}
         <section className="py-20 bg-white/5">

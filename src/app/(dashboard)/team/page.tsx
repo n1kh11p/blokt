@@ -7,11 +7,11 @@ import { AddMemberDialog } from '@/components/team/add-member-dialog'
 import { redirect } from 'next/navigation'
 
 const roleColors: Record<string, string> = {
-  project_manager: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-  foreman: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  field_worker: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  safety_manager: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  executive: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300',
+  project_manager: 'bg-purple-100 text-purple-700',
+  foreman: 'bg-blue-100 text-blue-700',
+  field_worker: 'bg-green-100 text-green-700',
+  safety_manager: 'bg-orange-100 text-orange-700',
+  executive: 'bg-stone-100 text-stone-700',
 }
 
 export default async function TeamPage() {
@@ -35,8 +35,8 @@ export default async function TeamPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Team</h1>
-          <p className="text-stone-600 dark:text-stone-400">
+          <h1 className="text-2xl font-bold text-stone-900">Team</h1>
+          <p className="text-stone-600">
             Manage team members and assignments
           </p>
         </div>
@@ -82,7 +82,7 @@ export default async function TeamPage() {
                 <CardContent className="pt-6">
                   <div className="flex flex-col items-center text-center">
                     <Avatar className="h-16 w-16">
-                      <AvatarFallback className="bg-amber-100 text-amber-700 text-lg dark:bg-amber-900/30 dark:text-amber-400">
+                      <AvatarFallback className="bg-amber-100 text-amber-700 text-lg">
                         {initials}
                       </AvatarFallback>
                     </Avatar>

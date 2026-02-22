@@ -17,16 +17,16 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Settings</h1>
-        <p className="text-stone-600 dark:text-stone-400">
+        <h1 className="text-2xl font-bold text-stone-900">Settings</h1>
+        <p className="text-stone-600">
           Manage your account and preferences
         </p>
       </div>
 
       {profile.organization && (
-        <Card className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+        <Card className="bg-amber-50 border-amber-200">
           <CardContent className="py-4">
-            <p className="text-sm text-amber-800 dark:text-amber-200">
+            <p className="text-sm text-amber-800">
               <strong>Organization ID:</strong> {profile.organization.organization_id || profile.organization.id}
             </p>
           </CardContent>
@@ -56,7 +56,7 @@ export default async function SettingsPage() {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-stone-900 dark:text-white">Safety Alerts</p>
+                  <p className="font-medium text-stone-900">Safety Alerts</p>
                   <p className="text-sm text-stone-500">
                     Receive immediate notifications for safety violations
                   </p>
@@ -70,7 +70,7 @@ export default async function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-stone-900 dark:text-white">Daily Summary</p>
+                  <p className="font-medium text-stone-900">Daily Summary</p>
                   <p className="text-sm text-stone-500">
                     Receive a daily summary of project activity
                   </p>
@@ -84,7 +84,7 @@ export default async function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-stone-900 dark:text-white">Task Updates</p>
+                  <p className="font-medium text-stone-900">Task Updates</p>
                   <p className="text-sm text-stone-500">
                     Notifications when tasks are completed or delayed
                   </p>
@@ -110,10 +110,10 @@ export default async function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg border border-stone-200 p-4 dark:border-stone-800">
+              <div className="rounded-lg border border-stone-200 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-stone-900 dark:text-white">API Key</p>
+                    <p className="font-medium text-stone-900">API Key</p>
                     <p className="font-mono text-sm text-stone-500">
                       blokt_sk_****************************
                     </p>

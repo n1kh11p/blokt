@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import { transitions } from '@/components/core/motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ThemeToggle } from '@/components/theme-toggle'
+
 
 interface PMShellProps {
   children: React.ReactNode
@@ -46,9 +46,9 @@ const bottomNavItems = [
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
 
-export function PMShell({ 
-  children, 
-  userName, 
+export function PMShell({
+  children,
+  userName,
   userEmail,
   userAvatar,
   projects = [],
@@ -80,7 +80,7 @@ export function PMShell({
       >
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
-          <motion.div 
+          <motion.div
             className="shrink-0"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -119,7 +119,7 @@ export function PMShell({
                 isProjectSwitcherOpen && 'rotate-180'
               )} />
             </button>
-            
+
             <AnimatePresence>
               {isProjectSwitcherOpen && (
                 <motion.div
@@ -253,7 +253,7 @@ export function PMShell({
       </motion.aside>
 
       {/* Main Content */}
-      <motion.div 
+      <motion.div
         className="flex flex-1 flex-col"
         initial={false}
         animate={{ marginLeft: isCollapsed ? 72 : 260 }}
@@ -273,8 +273,8 @@ export function PMShell({
           </div>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
-            
+
+
             <button className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
               <Bell className="h-5 w-5" />
               <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">

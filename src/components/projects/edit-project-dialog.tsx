@@ -98,7 +98,7 @@ export function EditProjectDialog({ project, children }: EditProjectDialogProps)
 
         {deleteConfirm ? (
           <div className="space-y-4 py-4">
-            <p className="text-sm text-stone-600 dark:text-stone-400">
+            <p className="text-sm text-stone-600">
               Are you sure you want to delete <strong>{project.name}</strong>? This action cannot be undone.
             </p>
             {error && (

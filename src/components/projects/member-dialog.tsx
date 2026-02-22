@@ -149,22 +149,7 @@ export function AddMemberDialog({ projectId, children }: AddMemberDialogProps) {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="project_manager">Project Manager</SelectItem>
-                  <SelectItem value="foreman">Foreman</SelectItem>
-                  <SelectItem value="field_worker">Field Worker</SelectItem>
-                  <SelectItem value="safety_manager">Safety Manager</SelectItem>
-                  <SelectItem value="executive">Executive</SelectItem>
-                </SelectContent>
-              </Select>
-              <input type="hidden" name="role" value={selectedRole} />
-            </div>
+            <input type="hidden" name="role" value={selectedRole} />
           </div>
 
           <DialogFooter>
@@ -250,7 +235,7 @@ export function EditMemberDialog({ projectId, member, children }: EditMemberDial
 
         {deleteConfirm ? (
           <div className="space-y-4 py-4">
-            <p className="text-sm text-stone-600 dark:text-stone-400">
+            <p className="text-sm text-stone-600">
               Are you sure you want to remove <strong>{member.name || member.email}</strong> from this project?
             </p>
             {error && (
@@ -282,8 +267,8 @@ export function EditMemberDialog({ projectId, member, children }: EditMemberDial
                 <p className="text-sm text-red-500">{error}</p>
               )}
 
-              <div className="rounded-lg border border-stone-200 p-3 dark:border-stone-800">
-                <p className="font-medium text-stone-900 dark:text-white">
+              <div className="rounded-lg border border-stone-200 p-3">
+                <p className="font-medium text-stone-900">
                   {member.name || 'Unknown'}
                 </p>
                 <p className="text-sm text-stone-500">

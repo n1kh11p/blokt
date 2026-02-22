@@ -30,11 +30,11 @@ interface MutationResponse {
 async function getAuthenticatedUser() {
   const supabase = await createClient()
   const { data: { user }, error } = await supabase.auth.getUser()
-  
+
   if (error || !user) {
     return { user: null, supabase, error: 'Not authenticated' }
   }
-  
+
   return { user, supabase, error: null }
 }
 
@@ -45,7 +45,7 @@ async function getAuthenticatedUser() {
 
 export async function getOrganizationMembers(): Promise<ApiResponse<TeamMember[]>> {
   const { user, supabase, error: authError } = await getAuthenticatedUser()
-  
+
   if (authError || !user) {
     return { error: authError || 'Not authenticated', data: null }
   }
@@ -83,16 +83,16 @@ export async function getOrganizationMembers(): Promise<ApiResponse<TeamMember[]
 
     // Enrich members with project count and project names
     const enrichedMembers = (members || []).map((member: User) => {
-      const memberProjects = (projects || []).filter((p: { user_ids: string[] | null }) => 
+      const memberProjects = (projects || []).filter((p: { user_ids: string[] | null }) =>
         p.user_ids?.includes(member.user_id)
       )
-      
+
       return {
         ...member,
         projectCount: memberProjects.length,
-        projects: memberProjects.map((p: { id: string; name: string }) => ({ 
-          id: p.id, 
-          name: p.name 
+        projects: memberProjects.map((p: { id: string; name: string }) => ({
+          id: p.id,
+          name: p.name
         }))
       }
     })
@@ -109,31 +109,19 @@ export async function getOrganizationMembers(): Promise<ApiResponse<TeamMember[]
 // Creates a new user account and adds them to the organization
 // ============================================
 
-export async function addTeamMember(formData: {
-  email: string
-  name: string
-  role: UserRole
-  phone?: string
-  trade?: string
-}): Promise<MutationResponse> {
+// ============================================
+// GET ORGANIZATION INVITE CODE
+// Returns the organization ID which acts as the invite code
+// ============================================
+
+export async function getOrganizationInviteCode(): Promise<ApiResponse<{ code: string }>> {
   const { user, supabase, error: authError } = await getAuthenticatedUser()
-  
+
   if (authError || !user) {
-    return { error: authError || 'Not authenticated', success: false }
+    return { error: authError || 'Not authenticated', data: null }
   }
 
   try {
-    // Validate required fields
-    if (!formData.email || !formData.name || !formData.role) {
-      return { error: 'Email, name, and role are required', success: false }
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(formData.email)) {
-      return { error: 'Invalid email format', success: false }
-    }
-
     // Get current user's organization
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: currentUser } = await (supabase as any)
@@ -143,66 +131,13 @@ export async function addTeamMember(formData: {
       .single()
 
     if (!currentUser?.organization_id) {
-      return { error: 'User not associated with an organization', success: false }
+      return { error: 'User not associated with an organization', data: null }
     }
 
-    // Check if user with this email already exists
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existingUser } = await (supabase as any)
-      .from('users')
-      .select('user_id')
-      .eq('email', formData.email)
-      .single()
-
-    if (existingUser) {
-      return { error: 'User with this email already exists', success: false }
-    }
-
-    // Create auth user with Supabase Auth Admin API
-    // Note: In production, you'd use the Admin API or invite flow
-    // For now, we'll create a user record directly (requires auth setup)
-    const { data: authUser, error: authCreateError } = await supabase.auth.admin.createUser({
-      email: formData.email,
-      email_confirm: true,
-      user_metadata: {
-        name: formData.name,
-        role: formData.role
-      }
-    })
-
-    if (authCreateError || !authUser.user) {
-      console.error('[Team] Auth creation error:', authCreateError)
-      return { error: `Failed to create user account: ${authCreateError?.message || 'Unknown error'}`, success: false }
-    }
-
-    // Create user record in database
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: dbError } = await (supabase as any)
-      .from('users')
-      .insert({
-        user_id: authUser.user.id,
-        email: formData.email,
-        name: formData.name,
-        role: formData.role,
-        phone: formData.phone || null,
-        trade: formData.trade || null,
-        organization_id: currentUser.organization_id,
-        project_ids: []
-      })
-
-    if (dbError) {
-      console.error('[Team] Database error:', dbError)
-      // Try to clean up auth user if database insert fails
-      await supabase.auth.admin.deleteUser(authUser.user.id)
-      return { error: `Failed to create user record: ${dbError.message}`, success: false }
-    }
-
-    revalidatePath('/team')
-    
-    return { error: null, success: true }
+    return { error: null, data: { code: currentUser.organization_id } }
   } catch (err) {
-    console.error('[Team] Unexpected error adding team member:', err)
-    return { error: err instanceof Error ? err.message : 'Failed to add team member', success: false }
+    console.error('[Team] Unexpected error getting invite code:', err)
+    return { error: err instanceof Error ? err.message : 'Failed to get invite code', data: null }
   }
 }
 
@@ -213,7 +148,7 @@ export async function addTeamMember(formData: {
 
 export async function removeTeamMember(userId: string): Promise<MutationResponse> {
   const { user, supabase, error: authError } = await getAuthenticatedUser()
-  
+
   if (authError || !user) {
     return { error: authError || 'Not authenticated', success: false }
   }
@@ -260,7 +195,7 @@ export async function removeTeamMember(userId: string): Promise<MutationResponse
     }
 
     revalidatePath('/team')
-    
+
     return { error: null, success: true }
   } catch (err) {
     console.error('[Team] Error removing team member:', err)

@@ -202,6 +202,7 @@ export interface Database {
           start: string | null
           endtime: string | null
           task_ids: string[] | null
+          action_annotations: Json | null
           created_at: string | null
           updated_at: string | null
         }
@@ -212,6 +213,7 @@ export interface Database {
           start?: string | null
           endtime?: string | null
           task_ids?: string[] | null
+          action_annotations?: Json | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -222,6 +224,7 @@ export interface Database {
           start?: string | null
           endtime?: string | null
           task_ids?: string[] | null
+          action_annotations?: Json | null
           created_at?: string | null
           updated_at?: string | null
         }

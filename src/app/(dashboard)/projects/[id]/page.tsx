@@ -23,10 +23,10 @@ import { SafetyAlertCard } from '@/components/safety/alert-card'
 import { CreateSafetyAlertDialog } from '@/components/safety/create-alert-dialog'
 
 const statusColors: Record<string, string> = {
-  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  completed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  on_hold: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  active: 'bg-green-100 text-green-700',
+  completed: 'bg-blue-100 text-blue-700',
+  on_hold: 'bg-yellow-100 text-yellow-700',
+  cancelled: 'bg-red-100 text-red-700',
 }
 
 interface ProjectPageProps {
@@ -59,14 +59,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-stone-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-stone-900">
               {project.name}
             </h1>
             <Badge className={statusColors[project.status || 'pending']}>
               {statusLabel}
             </Badge>
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-stone-600 dark:text-stone-400">
+          <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-stone-600">
             {project.location && (
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
@@ -92,11 +92,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                <CheckCircle2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                <CheckCircle2 className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-stone-900 dark:text-white">
+                <p className="text-2xl font-bold text-stone-900">
                   {completedTasks}/{taskCount}
                 </p>
                 <p className="text-sm text-stone-500">Tasks Completed</p>
@@ -108,11 +108,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-                <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                <Users className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-stone-900 dark:text-white">
+                <p className="text-2xl font-bold text-stone-900">
                   {memberCount}
                 </p>
                 <p className="text-sm text-stone-500">Team Members</p>
@@ -124,11 +124,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                <Video className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
+                <Video className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-stone-900 dark:text-white">
+                <p className="text-2xl font-bold text-stone-900">
                   {videoCount}
                 </p>
                 <p className="text-sm text-stone-500">Video Uploads</p>
@@ -140,11 +140,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-stone-900 dark:text-white">
+                <p className="text-2xl font-bold text-stone-900">
                   {alertCount}
                 </p>
                 <p className="text-sm text-stone-500">Safety Alerts</p>
@@ -157,7 +157,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       {project.description && (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-stone-600 dark:text-stone-400">{project.description}</p>
+            <p className="text-stone-600">{project.description}</p>
           </CardContent>
         </Card>
       )}
@@ -187,7 +187,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               {taskCount === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Clock className="h-12 w-12 text-stone-400" />
-                  <h3 className="mt-4 text-lg font-medium text-stone-900 dark:text-white">
+                  <h3 className="mt-4 text-lg font-medium text-stone-900">
                     No tasks yet
                   </h3>
                   <p className="mt-2 text-sm text-stone-500">
@@ -207,9 +207,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     assignees: string[] | null
                   }) => (
                     <TaskDialog key={task.id} projectId={project.id} task={task as any} mode="edit">
-                      <div className="flex cursor-pointer items-center justify-between rounded-lg border border-stone-200 p-4 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900">
+                      <div className="flex cursor-pointer items-center justify-between rounded-lg border border-stone-200 p-4 transition-colors hover:bg-stone-50:bg-stone-900">
                         <div>
-                          <p className="font-medium text-stone-900 dark:text-white">
+                          <p className="font-medium text-stone-900">
                             {task.name}
                           </p>
                           <p className="text-sm text-stone-500">
@@ -246,7 +246,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               {memberCount === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Users className="h-12 w-12 text-stone-400" />
-                  <h3 className="mt-4 text-lg font-medium text-stone-900 dark:text-white">
+                  <h3 className="mt-4 text-lg font-medium text-stone-900">
                     No team members
                   </h3>
                   <p className="mt-2 text-sm text-stone-500">
@@ -262,9 +262,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     email: string | null
                   }) => (
                     <EditMemberDialog key={member.user_id} projectId={project.id} member={member as any}>
-                      <div className="flex cursor-pointer items-center justify-between rounded-lg border border-stone-200 p-4 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900">
+                      <div className="flex cursor-pointer items-center justify-between rounded-lg border border-stone-200 p-4 transition-colors hover:bg-stone-50:bg-stone-900">
                         <div>
-                          <p className="font-medium text-stone-900 dark:text-white">
+                          <p className="font-medium text-stone-900">
                             {member.name || 'Unknown'}
                           </p>
                           <p className="text-sm text-stone-500">
@@ -291,7 +291,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               {videoCount === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Video className="h-12 w-12 text-stone-400" />
-                  <h3 className="mt-4 text-lg font-medium text-stone-900 dark:text-white">
+                  <h3 className="mt-4 text-lg font-medium text-stone-900">
                     No videos uploaded
                   </h3>
                   <p className="mt-2 text-sm text-stone-500">
@@ -325,7 +325,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               {alertCount === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <CheckCircle2 className="h-12 w-12 text-green-500" />
-                  <h3 className="mt-4 text-lg font-medium text-stone-900 dark:text-white">
+                  <h3 className="mt-4 text-lg font-medium text-stone-900">
                     No safety alerts
                   </h3>
                   <p className="mt-2 text-sm text-stone-500">

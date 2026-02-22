@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { transitions } from '@/components/core/motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ThemeToggle } from '@/components/theme-toggle'
+
 
 interface SafetyShellProps {
   children: React.ReactNode
@@ -42,9 +42,9 @@ const navItems = [
   { href: '/review', icon: FileText, label: 'Reports' },
 ]
 
-export function SafetyShell({ 
-  children, 
-  userName, 
+export function SafetyShell({
+  children,
+  userName,
   userAvatar,
   alertCounts = { critical: 0, high: 0, medium: 0, low: 0 },
 }: SafetyShellProps) {
@@ -53,7 +53,7 @@ export function SafetyShell({
   const supabase = createClient()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const initials = userName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'SM'
-  
+
   const totalAlerts = alertCounts.critical + alertCounts.high + alertCounts.medium + alertCounts.low
 
   const handleSignOut = async () => {
@@ -201,7 +201,7 @@ export function SafetyShell({
       </motion.aside>
 
       {/* Main Content */}
-      <motion.div 
+      <motion.div
         className="flex flex-1 flex-col"
         initial={false}
         animate={{ marginLeft: isCollapsed ? 72 : 280 }}
@@ -224,7 +224,7 @@ export function SafetyShell({
               <span>Filter</span>
             </button>
             <div className="flex items-center gap-3">
-              <ThemeToggle />
+
             </div>
             <button className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
               <Bell className="h-5 w-5" />

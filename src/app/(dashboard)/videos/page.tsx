@@ -14,8 +14,8 @@ export default async function VideosPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">My Videos</h1>
-          <p className="text-stone-600 dark:text-stone-400">
+          <h1 className="text-2xl font-bold text-stone-900">My Videos</h1>
+          <p className="text-stone-600">
             Upload and manage your field footage
           </p>
         </div>
@@ -28,7 +28,7 @@ export default async function VideosPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-600 dark:bg-red-900/20 dark:text-red-400">
+        <div className="rounded-lg bg-red-50 p-4 text-red-600">
           {error}
         </div>
       )}
@@ -37,10 +37,10 @@ export default async function VideosPage() {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Video className="h-12 w-12 text-stone-400" />
-            <h3 className="mt-4 text-lg font-medium text-stone-900 dark:text-white">
+            <h3 className="mt-4 text-lg font-medium text-stone-900">
               No videos uploaded
             </h3>
-            <p className="mt-2 text-sm text-stone-500 dark:text-stone-400">
+            <p className="mt-2 text-sm text-stone-500">
               Upload your first field video to get started
             </p>
             <div className="mt-4">
@@ -58,20 +58,20 @@ export default async function VideosPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {videos?.map((video) => (
           <Link key={video.video_id} href={`/videos/${video.video_id}`}>
-            <Card className="transition-all hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700 cursor-pointer h-full">
+            <Card className="transition-all hover:shadow-md hover:border-amber-300:border-amber-700 cursor-pointer h-full">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="rounded-lg bg-stone-100 p-3 dark:bg-stone-800">
-                    <FileVideo className="h-6 w-6 text-stone-600 dark:text-stone-400" />
+                  <div className="rounded-lg bg-stone-100 p-3">
+                    <FileVideo className="h-6 w-6 text-stone-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-medium text-stone-900 dark:text-white truncate">
+                      <h3 className="font-medium text-stone-900 truncate">
                         {video.uri || 'Unnamed Video'}
                       </h3>
                     </div>
 
-                    <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 truncate">
+                    <p className="text-sm text-stone-500 mt-1 truncate">
                       {video.uri}
                     </p>
 

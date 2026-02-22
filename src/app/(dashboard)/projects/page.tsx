@@ -9,10 +9,10 @@ import { SetupOrgPrompt } from '@/components/projects/setup-org-prompt'
 import { ProjectFilters } from '@/components/projects/project-filters'
 
 const statusColors: Record<string, string> = {
-  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  completed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  on_hold: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  active: 'bg-green-100 text-green-700',
+  completed: 'bg-blue-100 text-blue-700',
+  on_hold: 'bg-yellow-100 text-yellow-700',
+  cancelled: 'bg-red-100 text-red-700',
 }
 
 interface ProjectsPageProps {
@@ -44,8 +44,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Projects</h1>
-          <p className="text-stone-600 dark:text-stone-400">
+          <h1 className="text-2xl font-bold text-stone-900">Projects</h1>
+          <p className="text-stone-600">
             Manage and monitor all your construction projects
           </p>
         </div>
@@ -55,7 +55,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <ProjectFilters />
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-600 dark:bg-red-900/20 dark:text-red-400">
+        <div className="rounded-lg bg-red-50 p-4 text-red-600">
           {error}
         </div>
       )}
@@ -64,10 +64,10 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FolderOpen className="h-12 w-12 text-stone-400" />
-            <h3 className="mt-4 text-lg font-medium text-stone-900 dark:text-white">
+            <h3 className="mt-4 text-lg font-medium text-stone-900">
               No projects yet
             </h3>
-            <p className="mt-2 text-sm text-stone-500 dark:text-stone-400">
+            <p className="mt-2 text-sm text-stone-500">
               Create your first project to get started
             </p>
             <div className="mt-4">
@@ -83,12 +83,12 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
           return (
             <Link key={project.id} href={`/projects/${project.id}`}>
-              <Card className="transition-all hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700 cursor-pointer">
+              <Card className="transition-all hover:shadow-md hover:border-amber-300:border-amber-700 cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-semibold text-stone-900 dark:text-white">
+                        <h3 className="text-lg font-semibold text-stone-900">
                           {project.name}
                         </h3>
                         <Badge className={statusColors[project.status || 'pending']}>
@@ -96,7 +96,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                         </Badge>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-stone-600 dark:text-stone-400">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-stone-600">
                         {project.location && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-4 w-4" />
@@ -112,7 +112,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       </div>
 
                       {project.description && (
-                        <p className="text-sm text-stone-500 dark:text-stone-400 line-clamp-2">
+                        <p className="text-sm text-stone-500 line-clamp-2">
                           {project.description}
                         </p>
                       )}

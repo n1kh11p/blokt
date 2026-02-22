@@ -25,6 +25,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [role, setRole] = useState<UserRole>('field_worker')
+  const [inviteCode, setInviteCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -53,14 +54,26 @@ export default function RegisterPage() {
     }
 
     // The database trigger 'on_auth_user_created' automatically creates 
-    // the user record in public.users, so we don't need to do it here.
+    // the user record in public.users. If an invite code was provided, 
+    // we now link the profile to the organization.
+    if (data.user && inviteCode.trim()) {
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ organization_id: inviteCode.trim() })
+        .eq('user_id', data.user.id)
+
+      if (updateError) {
+        console.error('Failed to link organization:', updateError)
+        // We log the error but don't stop the flow; they are registered at least.
+      }
+    }
 
     router.push('/dashboard')
     router.refresh()
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-stone-50 px-4 dark:bg-stone-950">
+    <div className="flex min-h-screen items-center justify-center bg-stone-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500">
@@ -74,7 +87,7 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
                 {error}
               </div>
             )}
@@ -130,6 +143,20 @@ export default function RegisterPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="inviteCode">Organization Invite Code (Optional)</Label>
+              <Input
+                id="inviteCode"
+                type="text"
+                placeholder="Paste code from your team..."
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                disabled={isLoading}
+              />
+              <p className="text-xs text-stone-500">
+                Leave blank if you are setting up a new organization yourself.
+              </p>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -142,7 +169,7 @@ export default function RegisterPage() {
                 'Create Account'
               )}
             </Button>
-            <p className="text-center text-sm text-stone-600 dark:text-stone-400">
+            <p className="text-center text-sm text-stone-600">
               Already have an account?{' '}
               <Link href="/login" className="font-medium text-amber-600 hover:text-amber-500">
                 Sign in

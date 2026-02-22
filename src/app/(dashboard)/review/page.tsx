@@ -68,8 +68,8 @@ export default function ReviewPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Video Review</h1>
-          <p className="text-stone-600 dark:text-stone-400">
+          <h1 className="text-2xl font-bold text-stone-900">Video Review</h1>
+          <p className="text-stone-600">
             Review footage and validate AI-detected tasks
           </p>
         </div>
@@ -174,12 +174,12 @@ export default function ReviewPage() {
             </CardHeader>
             <CardContent>
               <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 w-px bg-stone-200 dark:bg-stone-700" />
+                <div className="absolute left-4 top-0 bottom-0 w-px bg-stone-200" />
                 <div className="space-y-4">
                   {mockTimeline.map((item, index) => (
                     <div key={index} className="relative flex gap-4 pl-10">
                       <div
-                        className={`absolute left-2 h-4 w-4 rounded-full border-2 border-white dark:border-stone-900 ${
+                        className={`absolute left-2 h-4 w-4 rounded-full border-2 border-white ${
                           item.type === 'alert'
                             ? 'bg-red-500'
                             : item.type === 'task'
@@ -195,7 +195,7 @@ export default function ReviewPage() {
                             <span className="font-mono text-sm text-stone-500">
                               {item.time}
                             </span>
-                            <span className="font-medium text-stone-900 dark:text-white">
+                            <span className="font-medium text-stone-900">
                               {item.label}
                             </span>
                             {item.type === 'alert' && (
@@ -228,13 +228,13 @@ export default function ReviewPage() {
                   onClick={() => setSelectedVideo(video)}
                   className={`cursor-pointer rounded-lg border p-3 transition-all ${
                     selectedVideo.id === video.id
-                      ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/10'
-                      : 'border-stone-200 hover:border-stone-300 dark:border-stone-800'
+                      ? 'border-amber-500 bg-amber-50'
+                      : 'border-stone-200 hover:border-stone-300'
                   }`}
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-medium text-stone-900 dark:text-white">
+                      <p className="font-medium text-stone-900">
                         {video.worker}
                       </p>
                       <p className="text-sm text-stone-500">{video.project}</p>
@@ -276,11 +276,11 @@ export default function ReviewPage() {
               <CardDescription>Ask questions about this footage</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border border-stone-200 p-4 dark:border-stone-800">
+              <div className="rounded-lg border border-stone-200 p-4">
                 <div className="flex items-start gap-3">
                   <MessageSquare className="h-5 w-5 text-amber-500" />
                   <div className="flex-1">
-                    <p className="text-sm text-stone-600 dark:text-stone-400">
+                    <p className="text-sm text-stone-600">
                       Ask me anything about this video, such as:
                     </p>
                     <ul className="mt-2 space-y-1 text-xs text-stone-500">
@@ -294,7 +294,7 @@ export default function ReviewPage() {
                   <input
                     type="text"
                     placeholder="Type your question..."
-                    className="w-full rounded-lg border border-stone-200 bg-transparent px-3 py-2 text-sm focus:border-amber-500 focus:outline-none dark:border-stone-700"
+                    className="w-full rounded-lg border border-stone-200 bg-transparent px-3 py-2 text-sm focus:border-amber-500 focus:outline-none"
                   />
                 </div>
               </div>

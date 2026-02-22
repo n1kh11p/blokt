@@ -22,8 +22,8 @@ export default async function AnalyticsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Analytics</h1>
-          <p className="text-stone-600 dark:text-stone-400">
+          <h1 className="text-2xl font-bold text-stone-900">Analytics</h1>
+          <p className="text-stone-600">
             Track execution performance and safety metrics
           </p>
         </div>
@@ -123,7 +123,7 @@ export default async function AnalyticsPage() {
                   <div key={day.date} className="flex-1 flex flex-col items-center gap-2">
                     <div className="w-full flex gap-1 h-[200px] items-end">
                       <div
-                        className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-t"
+                        className="flex-1 bg-stone-200 rounded-t"
                         style={{ height: `${(day.planned / 35) * 100}%` }}
                       />
                       <div
@@ -138,7 +138,7 @@ export default async function AnalyticsPage() {
               </div>
               <div className="flex justify-center gap-6 mt-4 pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-stone-200 dark:bg-stone-700 rounded" />
+                  <div className="w-3 h-3 bg-stone-200 rounded" />
                   <span className="text-sm text-stone-600">Planned</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -161,12 +161,12 @@ export default async function AnalyticsPage() {
                 {analytics.projectMetrics.map((project) => (
                   <div key={project.name} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-stone-900 dark:text-white">
+                      <span className="font-medium text-stone-900">
                         {project.name}
                       </span>
                       <span className="text-sm font-medium">{project.alignment}%</span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200">
                       <div
                         className="h-full rounded-full bg-amber-500 transition-all"
                         style={{ width: `${project.alignment}%` }}
@@ -191,9 +191,9 @@ export default async function AnalyticsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {analytics.tradePerformance.map((item) => (
-                    <div key={item.trade} className="flex items-center justify-between rounded-lg border border-stone-200 p-3 dark:border-stone-800">
+                    <div key={item.trade} className="flex items-center justify-between rounded-lg border border-stone-200 p-3">
                       <div>
-                        <p className="font-medium text-stone-900 dark:text-white">{item.trade}</p>
+                        <p className="font-medium text-stone-900">{item.trade}</p>
                         <p className="text-sm text-stone-500">{item.tasksCompleted} tasks • {item.avgDuration}h avg</p>
                       </div>
                       <div className={`text-lg font-bold ${item.onTimeRate >= 90 ? 'text-green-600' : 'text-amber-600'}`}>
@@ -217,13 +217,13 @@ export default async function AnalyticsPage() {
                   {analytics.weeklyTrends.map((week) => (
                     <div key={week.week} className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-stone-900 dark:text-white">{week.week}</span>
+                        <span className="font-medium text-stone-900">{week.week}</span>
                         <div className="flex items-center gap-4 text-sm">
                           <span className="text-green-600">{week.completion}% completed</span>
                           <span className="text-red-500">{week.delays} delays</span>
                         </div>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200">
                         <div
                           className="h-full rounded-full bg-green-500 transition-all"
                           style={{ width: `${week.productivity}%` }}
@@ -232,7 +232,7 @@ export default async function AnalyticsPage() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-800">
+                <div className="mt-4 pt-4 border-t border-stone-200">
                   <div className="flex items-center gap-2 text-sm text-green-600">
                     <TrendingUp className="h-4 w-4" />
                     <span>11% improvement over 4 weeks</span>
@@ -254,7 +254,7 @@ export default async function AnalyticsPage() {
                 {analytics.taskDurationAnalysis.map((item) => (
                   <div key={item.task} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-stone-900 dark:text-white">{item.task}</span>
+                      <span className="text-stone-900">{item.task}</span>
                       <div className="flex items-center gap-4 text-sm">
                         <span className="text-stone-500">
                           {item.observed}h / {item.expected}h expected
@@ -264,7 +264,7 @@ export default async function AnalyticsPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200">
                       <div
                         className={`h-full rounded-full transition-all ${
                           item.efficiency >= 100 ? 'bg-green-500' : 'bg-amber-500'
@@ -292,7 +292,7 @@ export default async function AnalyticsPage() {
                 {analytics.safetyViolations.map((item) => (
                   <div
                     key={item.type}
-                    className="flex items-center justify-between rounded-lg border border-stone-200 p-4 dark:border-stone-800"
+                    className="flex items-center justify-between rounded-lg border border-stone-200 p-4"
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -306,21 +306,21 @@ export default async function AnalyticsPage() {
                             : 'bg-blue-500'
                         }`}
                       />
-                      <span className="text-stone-900 dark:text-white">{item.type}</span>
+                      <span className="text-stone-900">{item.type}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl font-bold text-stone-900 dark:text-white">
+                      <span className="text-2xl font-bold text-stone-900">
                         {item.count}
                       </span>
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-medium ${
                           item.severity === 'critical'
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                            ? 'bg-red-100 text-red-700'
                             : item.severity === 'high'
-                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                            ? 'bg-orange-100 text-orange-700'
                             : item.severity === 'medium'
-                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-blue-100 text-blue-700'
                         }`}
                       >
                         {item.severity}

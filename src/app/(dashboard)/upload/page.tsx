@@ -7,9 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Upload, CheckCircle2, Loader2, Video, X } from 'lucide-react'
-import { getWorkerTasks, uploadVideo } from '@/lib/actions/upload'
+import { Upload, CheckCircle2, Loader2, Video, X, Sparkles } from 'lucide-react'
 import type { Task } from '@/types'
+import { Progress } from '@/components/ui/progress'
+import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
+import { getWorkerTasks, uploadVideo, processVideoAnnotations } from '@/lib/actions/upload'
 
 export default function UploadPage() {
   const router = useRouter()
@@ -20,7 +23,10 @@ export default function UploadPage() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoadingTasks, setIsLoadingTasks] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isProcessingAI, setIsProcessingAI] = useState(false)
   const [uploadComplete, setUploadComplete] = useState(false)
+  const [completedTaskNames, setCompletedTaskNames] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
   // Fetch worker's tasks on mount
@@ -55,6 +61,20 @@ export default function UploadPage() {
       }
       setFile(selectedFile)
       setError(null)
+
+      // Calculate start and end times automatically based on file modified time & duration
+      const end = new Date(selectedFile.lastModified)
+      setEndtime(end.toISOString())
+
+      const video = document.createElement('video')
+      video.preload = 'metadata'
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src)
+        const durationMs = video.duration * 1000
+        const startDt = new Date(selectedFile.lastModified - durationMs)
+        setStart(startDt.toISOString())
+      }
+      video.src = URL.createObjectURL(selectedFile)
     }
   }
 
@@ -62,7 +82,16 @@ export default function UploadPage() {
     if (!file) return
 
     setIsUploading(true)
+    setUploadProgress(0)
     setError(null)
+
+    // Simulate progress while uploading
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 90) return 90 // Cap at 90 until real upload finishes
+        return prev + 10
+      })
+    }, 500)
 
     const formData = new FormData()
     formData.append('file', file)
@@ -72,12 +101,65 @@ export default function UploadPage() {
 
     const result = await uploadVideo(formData)
 
-    if (result.error) {
-      setError(result.error)
+    clearInterval(progressInterval)
+    setUploadProgress(100)
+
+    if (result.error || !result.success || !result.videoId) {
+      setError(result.error || 'Upload failed')
       setIsUploading(false)
-    } else {
-      setIsUploading(false)
-      setUploadComplete(true)
+      return
+    }
+
+    toast.success('Video uploaded successfully!', {
+      description: 'Now processing with AI to verify task completion...'
+    })
+
+    setIsProcessingAI(true)
+
+    // Call AI action to read json and update tasks
+    const aiResult = await processVideoAnnotations(result.videoId, selectedTasks)
+
+    setIsUploading(false)
+    setIsProcessingAI(false)
+    setUploadComplete(true)
+
+    if (aiResult.success && aiResult.completedTaskIds && aiResult.completedTaskIds.length > 0) {
+      const names = tasks
+        .filter(t => (aiResult.completedTaskIds as string[]).includes(t.id))
+        .map(t => t.name)
+
+      setCompletedTaskNames(names)
+
+      // Trigger Celebration
+      const duration = 3 * 1000
+      const end = Date.now() + duration
+
+      const frame = () => {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#f59e0b', '#10b981', '#ef4444']
+        })
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#f59e0b', '#10b981', '#ef4444']
+        })
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame)
+        }
+      }
+      frame()
+
+      toast.success('Tasks Verified!', {
+        description: `AI confirmed completion of ${names.length} tasks.`,
+        icon: <Sparkles className="h-4 w-4 text-amber-500" />
+      })
     }
   }
 
@@ -86,6 +168,8 @@ export default function UploadPage() {
     setStart('')
     setEndtime('')
     setSelectedTasks([])
+    setUploadProgress(0)
+    setCompletedTaskNames([])
     setUploadComplete(false)
     setError(null)
   }
@@ -95,20 +179,44 @@ export default function UploadPage() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-6">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
-            </div>
-            <h2 className="text-xl font-semibold text-stone-900 dark:text-white">
-              Upload Complete!
+            {completedTaskNames.length > 0 ? (
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                <Sparkles className="h-8 w-8 text-amber-600" />
+              </div>
+            ) : (
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              </div>
+            )}
+
+            <h2 className="text-xl font-semibold text-stone-900">
+              {completedTaskNames.length > 0 ? 'Tasks Verified!' : 'Upload Complete!'}
             </h2>
-            <p className="mt-2 text-stone-600 dark:text-stone-400">
-              Your footage has been uploaded and is now being processed.
-            </p>
+
+            {completedTaskNames.length > 0 ? (
+              <div className="mt-4 rounded-lg bg-stone-50 p-4 text-left border border-stone-100">
+                <p className="text-sm font-medium text-stone-900 mb-2">
+                  AI analysis verified the following tasks:
+                </p>
+                <ul className="space-y-1">
+                  {completedTaskNames.map((name, i) => (
+                    <li key={i} className="text-sm text-green-700 flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3" /> {name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="mt-2 text-stone-600">
+                Your footage has been uploaded and is now being processed.
+              </p>
+            )}
+
             <div className="mt-6 flex gap-3 justify-center">
               <Button variant="outline" onClick={resetForm}>
                 Upload Another
               </Button>
-              <Button 
+              <Button
                 className="bg-amber-500 hover:bg-amber-600"
                 onClick={() => router.push('/videos')}
               >
@@ -124,16 +232,16 @@ export default function UploadPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Upload Footage</h1>
-        <p className="text-stone-600 dark:text-stone-400">
+        <h1 className="text-2xl font-bold text-stone-900">Upload Footage</h1>
+        <p className="text-stone-600">
           Upload bodycam footage and tag the tasks you performed
         </p>
       </div>
 
       {error && (
-        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+        <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-sm text-red-600">{error}</p>
           </CardContent>
         </Card>
       )}
@@ -162,11 +270,11 @@ export default function UploadPage() {
                 </p>
               </div>
             ) : (
-              <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-                <Video className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
+                <Video className="h-5 w-5 text-green-600" />
                 <div className="flex-1">
-                  <p className="font-medium text-green-900 dark:text-green-100">{file.name}</p>
-                  <p className="text-sm text-green-600 dark:text-green-400">
+                  <p className="font-medium text-green-900">{file.name}</p>
+                  <p className="text-sm text-green-600">
                     {(file.size / (1024 * 1024)).toFixed(2)} MB
                   </p>
                 </div>
@@ -184,39 +292,7 @@ export default function UploadPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recording Timeline</CardTitle>
-            <CardDescription>
-              Provide context about when this footage was recorded
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start">Start Time</Label>
-                <Input
-                  id="start"
-                  type="datetime-local"
-                  value={start}
-                  onChange={(e) => setStart(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="endtime">End Time</Label>
-                <Input
-                  id="endtime"
-                  type="datetime-local"
-                  value={endtime}
-                  onChange={(e) => setEndtime(e.target.value)}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       <Card>
         <CardHeader>
@@ -232,7 +308,7 @@ export default function UploadPage() {
               <span className="ml-2 text-sm text-stone-500">Loading your tasks...</span>
             </div>
           ) : tasks.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-8 text-center dark:border-stone-800 dark:bg-stone-900/50">
+            <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-8 text-center">
               <p className="text-sm text-stone-500">No tasks assigned to you yet</p>
             </div>
           ) : (
@@ -245,8 +321,8 @@ export default function UploadPage() {
                       key={task.id}
                       variant={isSelected ? 'default' : 'outline'}
                       className={`cursor-pointer transition-all ${isSelected
-                          ? 'bg-amber-500 hover:bg-amber-600'
-                          : 'hover:border-amber-500 hover:text-amber-600'
+                        ? 'bg-amber-500 hover:bg-amber-600'
+                        : 'hover:border-amber-500 hover:text-amber-600'
                         }`}
                       onClick={() => toggleTask(task.id)}
                     >
@@ -266,27 +342,40 @@ export default function UploadPage() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={resetForm}>
-          Cancel
-        </Button>
-        <Button
-          className="bg-amber-500 hover:bg-amber-600"
-          disabled={!file || isUploading}
-          onClick={handleUpload}
-        >
-          {isUploading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Footage
-            </>
-          )}
-        </Button>
+      <div className="flex flex-col items-end gap-3">
+        {(isUploading || isProcessingAI) && (
+          <div className="w-full max-w-sm space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-stone-600">
+                {isProcessingAI ? 'AI Analyzing Footage...' : 'Uploading...'}
+              </span>
+              <span className="font-medium">{uploadProgress}%</span>
+            </div>
+            <Progress value={uploadProgress} className="h-2" />
+          </div>
+        )}
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={resetForm} disabled={isUploading || isProcessingAI}>
+            Cancel
+          </Button>
+          <Button
+            className="bg-amber-500 hover:bg-amber-600"
+            disabled={!file || isUploading || isProcessingAI}
+            onClick={handleUpload}
+          >
+            {isUploading || isProcessingAI ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isProcessingAI ? 'Processing...' : 'Uploading...'}
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                Upload Footage
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   )

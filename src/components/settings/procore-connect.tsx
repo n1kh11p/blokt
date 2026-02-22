@@ -63,13 +63,13 @@ export function ProcoreConnect() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-lg border border-stone-200 p-4 dark:border-stone-800">
+        <div className="flex items-center justify-between rounded-lg border border-stone-200 p-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
               <span className="text-xl font-bold text-orange-600">P</span>
             </div>
             <div>
-              <p className="font-medium text-stone-900 dark:text-white">Procore</p>
+              <p className="font-medium text-stone-900">Procore</p>
               {connected ? (
                 <p className="text-sm text-green-600 flex items-center gap-1">
                   <Check className="h-3 w-3" />
@@ -107,17 +107,17 @@ export function ProcoreConnect() {
         </div>
 
         {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 p-4 dark:bg-red-900/20 dark:border-red-800">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+            <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
 
         {result && (
-          <div className="rounded-lg bg-green-50 border border-green-200 p-4 dark:bg-green-900/20 dark:border-green-800">
-            <p className="font-medium text-green-800 dark:text-green-200 mb-2">
+          <div className="rounded-lg bg-green-50 border border-green-200 p-4">
+            <p className="font-medium text-green-800 mb-2">
               Successfully synced from Procore:
             </p>
-            <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
+            <ul className="text-sm text-green-700 space-y-1">
               <li>• {result.projects} projects imported</li>
               <li>• {result.users} team members created</li>
               <li>• {result.tasks} tasks imported</li>
@@ -127,11 +127,11 @@ export function ProcoreConnect() {
         )}
 
         {connected && (
-          <div className="rounded-lg bg-stone-50 border border-stone-200 p-4 dark:bg-stone-800/50 dark:border-stone-700">
-            <p className="text-sm text-stone-600 dark:text-stone-400">
+          <div className="rounded-lg bg-stone-50 border border-stone-200 p-4">
+            <p className="text-sm text-stone-600">
               <strong>API Endpoints Synced:</strong>
             </p>
-            <ul className="text-xs text-stone-500 dark:text-stone-400 mt-2 space-y-1 font-mono">
+            <ul className="text-xs text-stone-500 mt-2 space-y-1 font-mono">
               <li>GET /rest/v1.1/projects</li>
               <li>GET /rest/v1.0/projects/{'{project_id}'}/users</li>
               <li>GET /rest/v1.0/projects/{'{project_id}'}/rfis</li>

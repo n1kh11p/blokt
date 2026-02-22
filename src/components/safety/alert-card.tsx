@@ -27,8 +27,8 @@ export function SafetyAlertCard({ alert, critical }: SafetyAlertCardProps) {
   }
 
   const borderClass = critical
-    ? 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-900/10'
-    : 'border-stone-200 dark:border-stone-800'
+    ? 'border-red-200 bg-red-50'
+    : 'border-stone-200'
 
   return (
     <div className={`flex items-center justify-between rounded-lg border p-4 ${borderClass}`}>
@@ -42,18 +42,18 @@ export function SafetyAlertCard({ alert, critical }: SafetyAlertCardProps) {
         </div>
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-stone-900 dark:text-white">
+            <span className="font-medium text-stone-900">
               {alert.safety_name || 'Safety Issue'}
             </span>
           </div>
-          <p className="text-sm text-stone-600 dark:text-stone-400">
+          <p className="text-sm text-stone-600">
             {alert.task?.name || 'Unknown task'}
             {alert.user && ` • ${alert.user.name || alert.user.email}`}
             {' • '}
             {alert.timestamp ? new Date(alert.timestamp).toLocaleString() : 'No time'}
           </p>
           {alert.description && (
-            <p className="text-sm text-stone-500 dark:text-stone-400">
+            <p className="text-sm text-stone-500">
               {alert.description}
             </p>
           )}

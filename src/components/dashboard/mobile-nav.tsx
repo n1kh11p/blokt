@@ -62,11 +62,11 @@ export function MobileNav({ userRole }: MobileNavProps) {
       </SheetTrigger>
       <SheetContent side="left" className="w-64 p-0">
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center gap-2 border-b border-stone-200 px-6 dark:border-stone-800">
+          <div className="flex h-16 items-center gap-2 border-b border-stone-200 px-6">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500">
               <HardHat className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-stone-900 dark:text-white">Blokt</span>
+            <span className="text-xl font-bold text-stone-900">Blokt</span>
           </div>
 
           <nav className="flex-1 space-y-1 px-3 py-4">
@@ -80,8 +80,8 @@ export function MobileNav({ userRole }: MobileNavProps) {
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-                      : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-white'
+                      ? 'bg-amber-50 text-amber-700'
+                      : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900:bg-stone-800:text-white'
                   )}
                 >
                   <item.icon className="h-5 w-5" />

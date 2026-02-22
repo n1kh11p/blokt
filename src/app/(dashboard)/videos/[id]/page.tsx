@@ -38,7 +38,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-stone-900 dark:text-white break-all">
+            <h1 className="text-2xl font-bold text-stone-900 break-all">
               {video.uri || 'Unnamed Video'}
             </h1>
           </div>
@@ -53,7 +53,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
               {videoUrl ? (
                 <VideoPlayer url={videoUrl} />
               ) : (
-                <div className="flex items-center justify-center h-96 bg-stone-100 dark:bg-stone-800 rounded-lg">
+                <div className="flex items-center justify-center h-96 bg-stone-100 rounded-lg">
                   <div className="text-center">
                     <FileVideo className="h-12 w-12 text-stone-400 mx-auto" />
                     <p className="mt-2 text-stone-500">Video not available</p>
@@ -74,7 +74,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 <Calendar className="h-4 w-4 text-stone-400" />
                 <div>
                   <p className="text-sm text-stone-500">Created At</p>
-                  <p className="font-medium text-stone-900 dark:text-white">
+                  <p className="font-medium text-stone-900">
                     {video.created_at ? new Date(video.created_at).toLocaleDateString() : 'Unknown Date'}
                   </p>
                 </div>
@@ -85,7 +85,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                   <Clock className="h-4 w-4 text-stone-400" />
                   <div>
                     <p className="text-sm text-stone-500">Start Time</p>
-                    <p className="font-medium text-stone-900 dark:text-white">
+                    <p className="font-medium text-stone-900">
                       {new Date(video.start).toLocaleString()}
                     </p>
                   </div>
@@ -97,7 +97,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                   <Clock className="h-4 w-4 text-stone-400" />
                   <div>
                     <p className="text-sm text-stone-500">End Time</p>
-                    <p className="font-medium text-stone-900 dark:text-white">
+                    <p className="font-medium text-stone-900">
                       {new Date(video.endtime).toLocaleString()}
                     </p>
                   </div>

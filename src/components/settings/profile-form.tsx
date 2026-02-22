@@ -47,8 +47,8 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         <form onSubmit={handleProfileSubmit} className="space-y-4">
           {message && (
             <div className={`rounded-lg p-3 text-sm ${message.type === 'success'
-              ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-              : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+              ? 'bg-green-50 text-green-600'
+              : 'bg-red-50 text-red-600'
               }`}>
               {message.text}
             </div>
@@ -71,7 +71,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                 type="email"
                 defaultValue={profile.email || ''}
                 disabled
-                className="bg-stone-50 dark:bg-stone-900"
+                className="bg-stone-50"
               />
             </div>
             <div className="space-y-2">
@@ -142,8 +142,8 @@ export function PasswordForm() {
         <form onSubmit={handlePasswordSubmit} className="space-y-4">
           {message && (
             <div className={`rounded-lg p-3 text-sm ${message.type === 'success'
-              ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-              : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+              ? 'bg-green-50 text-green-600'
+              : 'bg-red-50 text-red-600'
               }`}>
               {message.text}
             </div>
