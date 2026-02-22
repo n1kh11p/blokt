@@ -5,25 +5,26 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    // Initialize theme from localStorage or system preference
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    // This will only run on the client after hydration
+    if (typeof window === 'undefined') return 'light'
+    
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light')
-    
-    setTheme(initialTheme)
+    return savedTheme || (prefersDark ? 'dark' : 'light')
+  })
+
+  useEffect(() => {
     setMounted(true)
     
-    // Apply theme to document
-    if (initialTheme === 'dark') {
+    // Apply theme to document on mount
+    if (theme === 'dark') {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
-  }, [])
+  }, [theme])
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
