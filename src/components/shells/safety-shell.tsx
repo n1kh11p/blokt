@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { transitions } from '@/components/core/motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 interface SafetyShellProps {
   children: React.ReactNode
@@ -222,7 +223,9 @@ export function SafetyShell({
               <Filter className="h-4 w-4" />
               <span>Filter</span>
             </button>
-
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+            </div>
             <button className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
               <Bell className="h-5 w-5" />
               {totalAlerts > 0 && (

@@ -19,16 +19,20 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
+  console.log('[Dashboard] Auth user ID:', user.id)
+
   // Fetch user role
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: userRecord } = await (supabase as any)
+  const { data: userRecord, error: userError } = await (supabase as any)
     .from('users')
     .select('*')
     .eq('user_id', user.id)
     .single()
 
-  const typedProfile = userRecord as User | null
+  console.log('[Dashboard] Query error:', userError)
   console.log('[Dashboard] User record from DB:', userRecord)
+  
+  const typedProfile = userRecord as User | null
   console.log('[Dashboard] Typed profile:', typedProfile)
   console.log('[Dashboard] Role from profile:', typedProfile?.role)
   
